@@ -24,7 +24,7 @@ local submodules = {
 	["dslib:raw_buffer"] = {
 		path = "src/raw_buffer.lua",
 		needs_IE = true,
-		sha256sum = "6022a9a47f1f421a7c1c590e8fe7a05968ed6e43622a995009c3823316491d31",
+		sha256sum = "875bf6bbab5aa728684d9ce44baf6393b436fff6b0325307dfc9a45bc776691a",
 		experimental = true,
 	},
 	["dslib:endian_helpers"] = {

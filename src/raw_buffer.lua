@@ -397,8 +397,9 @@ do
 	local function make_int_write_func(type_str)
 		local min = assert(int_ranges_mins[type_str])
 		local max = assert(int_ranges_maxs[type_str])
+		local c_type = ffi.typeof(type_str)
 		return make_write_func(type_str, function(value)
-			return check_int(value, min, max, ffi.typeof(type_str))
+			return check_int(value, min, max, c_type)
 		end)
 	end
 
@@ -507,8 +508,9 @@ do
 	local function make_int_append_func(type_str)
 		local min = assert(int_ranges_mins[type_str])
 		local max = assert(int_ranges_maxs[type_str])
+		local c_type = ffi.typeof(type_str)
 		return make_append_func(type_str, function(value)
-			return check_int(value, min, max, ffi.typeof(type_str))
+			return check_int(value, min, max, c_type)
 		end)
 	end
 
