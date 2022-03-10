@@ -13,6 +13,8 @@ _G.assert(IE ~= nil, "This module needs the insecure environment.")
 local new_luajit_stuff = {}
 new_luajit_stuff.version = "0.1.0"
 
+IE.pcall(IE.dslib_ie.internal.require_with_IE_env, "table.new")
+
 --- The `table.new` function.
 --
 -- Returns an empty new table if `table.new` was not found.

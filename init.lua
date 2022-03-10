@@ -24,7 +24,7 @@ local submodules = {
 	["dslib:raw_buffer"] = {
 		path = "src/raw_buffer.lua",
 		needs_IE = true,
-		sha256sum = "875bf6bbab5aa728684d9ce44baf6393b436fff6b0325307dfc9a45bc776691a",
+		sha256sum = "a2b489ce17c1801fe90dc003ac728642376ba7d86ec542923689dfdbf75a5099",
 		experimental = true,
 	},
 	["dslib:endian_helpers"] = {
@@ -35,7 +35,7 @@ local submodules = {
 	["dslib:new_luajit_stuff"] = {
 		path = "src/new_luajit_stuff.lua",
 		needs_IE = true,
-		sha256sum = "56540ab8d97029181f0938ad33e9cd896905204c5e07d2ccb92ad73cd238002e",
+		sha256sum = "4b557ed8cf7f4cec6f08874e7043898d89839ca919c9ceefe8118d45cb5cc7d3",
 		experimental = true,
 	},
 	["dslib:start_end"] = {

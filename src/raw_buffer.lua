@@ -27,6 +27,12 @@ ffi.cdef([[
 	void *realloc(void *ptr, size_t size);
 
 	void *memmove(void *dest, const void *src, size_t n);
+
+	struct DSlibBuf {
+		uint8_t *m_buffer;
+		size_t m_capacity;
+		size_t m_size;
+	};
 ]])
 
 local ctype_uint8_t_ptr = ffi.typeof("uint8_t *")
@@ -113,9 +119,8 @@ end
 raw_buffer.new_RawBuffer = function()
 	local buf = IE.setmetatable({}, RawBuffer_metatable)
 	s_RawBuffer_secrets[buf] = {
-		m_buffer = ffi_gc(ffi_cast(ctype_uint8_t_ptr, ffi_NULL), C.free),
-		m_capacity = 0ULL,
-		m_size = 0ULL,
+		m_struct = ffi_gc(ffi.new("struct DSlibBuf", {ffi_NULL, 0ULL, 0ULL}),
+				function(strct) C.free(strct.m_buffer) end),
 		m_next_lock_owner = nil, -- see set_lock(), unset_lock() for details
 		m_locked = false,
 	}
@@ -204,7 +209,7 @@ local function wrap_secret_and_atomar(func)
 	return function(self, ...)
 		local s = assert(s_RawBuffer_secrets[self])
 		set_lock(s)
-		local ret = func(s, ...)
+		local ret = func(s.m_struct, ...)
 		unset_lock(s)
 		return ret
 	end
@@ -215,7 +220,7 @@ end
 -- @treturn int The size.
 -- @function size
 function RawBuffer_methods:size()
-	local s = assert(s_RawBuffer_secrets[self])
+	local s = assert(s_RawBuffer_secrets[self]).m_struct
 	return s.m_size
 end
 
@@ -223,7 +228,7 @@ end
 -- @treturn int The capacity.
 -- @function capacity
 function RawBuffer_methods:capacity()
-	local s = assert(s_RawBuffer_secrets[self])
+	local s = assert(s_RawBuffer_secrets[self]).m_struct
 	return s.m_capacity
 end
 
@@ -250,14 +255,13 @@ local function RawBuffer_methods_reserve(s, new_capacity)
 		actual_new_capacity = bor(new_capacity - 1, 0xfULL) + 1
 	end
 
-	local new_buf = C.realloc(ffi_gc(s.m_buffer, nil), actual_new_capacity)
+	local new_buf = C.realloc(s.m_buffer, actual_new_capacity)
 	if new_buf == ffi_NULL then
 		-- realloc() failed. the original buffer is untouched
-		ffi_gc(s.m_buffer, C.free)
 		error("realloc() failed")
 	end
 
-	s.m_buffer = ffi_gc(ffi_cast(ctype_uint8_t_ptr, new_buf), C.free)
+	s.m_buffer = ffi_cast(ctype_uint8_t_ptr, new_buf)
 
 	s.m_capacity = actual_new_capacity
 end
@@ -482,7 +486,8 @@ do
 		local s_src = assert(s_RawBuffer_secrets[src_buf])
 		set_lock(s_dst)
 		set_lock(s_src)
-		RawBuffer_methods_copy_from_inner(s_dst, dst_offset, s_src, src_offset, len)
+		RawBuffer_methods_copy_from_inner(s_dst.m_struct, dst_offset,
+				s_src.m_struct, src_offset, len)
 		unset_lock(s_src)
 		unset_lock(s_dst)
 	end
