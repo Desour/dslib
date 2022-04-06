@@ -20,6 +20,8 @@ rbuf2:resize(counter_max * typ_size)
 local t = new_luajit_stuff.table_new(counter_max, 0)
 local ffi_buf = ffi.new(typ.."["..counter_max.."]")
 
+--~ local C = ffi.C
+
 --~ local append_i32 = rbuf1.append_i32
 --~ local function append_i32_rbuf1(i)
 	--~ append_i32(rbuf1, i)
@@ -28,6 +30,9 @@ local ffi_buf = ffi.new(typ.."["..counter_max.."]")
 --~ local function table_set(t, k, v)
 	--~ t[k] = v
 --~ end
+
+--~ jit.off()
+--~ counter_max = counter_max / 100
 
 --~ local jv = require("jit.v")
 --~ local jv = require("jit.dump")
@@ -47,6 +52,7 @@ for i = 0, counter_max-1 do
 	--~ table.insert(t, i)
 
 	--~ ffi_buf[i] = i
+	--~ C.abs(i)
 end
 
 local dt = os.clock() - t0
@@ -56,3 +62,4 @@ local dt = os.clock() - t0
 debug.getregistry(t, rbuf1, rbuf2, ffi_buf)
 
 print(("it took: %f s"):format(dt))
+print(("each: %f ns"):format(dt/counter_max*1e9))

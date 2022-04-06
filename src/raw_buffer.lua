@@ -28,6 +28,8 @@ ffi.cdef([[
 
 	void *memmove(void *dest, const void *src, size_t n);
 
+	int abs(int j); // TODO
+
 	struct DSlibBuf {
 		uint8_t *m_buffer;
 		size_t m_capacity;
@@ -118,7 +120,7 @@ end
 -- @function new_RawBuffer
 raw_buffer.new_RawBuffer = function()
 	local buf = IE.setmetatable({}, RawBuffer_metatable)
-	s_RawBuffer_secrets[buf] = {
+	s_RawBuffer_secrets[buf] = { -- TODO: don't name the fields with strings
 		m_struct = ffi_gc(ffi.new("struct DSlibBuf", {ffi_NULL, 0ULL, 0ULL}),
 				function(strct) C.free(strct.m_buffer) end),
 		m_next_lock_owner = nil, -- see set_lock(), unset_lock() for details
@@ -177,8 +179,11 @@ thing.
 
 -- sets the lock on s. if not possible, raises an error and possibly poisons the
 -- lock. (this is just for detection of atomarity violations, not for synchronization)
--- TODO: try if a ffi call is faster
+-- (a ffi call would be slower, when jited)
 local function set_lock(s)
+	--~ C.abs(1)
+	--~ do return end
+
 	local me = {}
 
 	s.m_next_lock_owner = me
