@@ -1,0 +1,48 @@
+
+dofile("load_dslib.lua")
+
+local rotnum = dslib.mrequire("dslib:rotnum")
+
+describe("rotnum", function()
+	it("id()", function()
+		assert.equals(rotnum.id(), rotnum.comp(rotnum.id(), rotnum.id()))
+		local v = vector.new(1, 2, 3)
+		assert.equals(v, rotnum.apply(rotnum.id(), v))
+	end)
+
+	it("comp()", function()
+		assert.equals(0x000, rotnum.comp(0x000, 0x000))
+		assert.equals(0x002, rotnum.comp(0x001, 0x020))
+		assert.equals(0x440, rotnum.comp(0x004, 0x004))
+		assert.equals(0x666, rotnum.comp(0x000, 0x006))
+		assert.equals(0x006, rotnum.comp(0x001, 0x060))
+		assert.equals(0x060, rotnum.comp(0x010, 0x060))
+		assert.equals(0x020, rotnum.comp(0x050, 0x060))
+	end)
+
+	it("rjw()", function()
+		assert.equals(rotnum.r1x(), rotnum.comp(rotnum.id(),  rotnum.r1x()))
+		assert.equals(rotnum.r1x(), rotnum.comp(rotnum.r1x(), rotnum.id()))
+		assert.equals(rotnum.r2x(), rotnum.comp(rotnum.r1x(), rotnum.r1x()))
+		assert.equals(rotnum.r3x(), rotnum.comp(rotnum.r1x(), rotnum.r2x()))
+		assert.equals(rotnum.r3x(), rotnum.comp(rotnum.r2x(), rotnum.r1x()))
+		assert.equals(rotnum.id(),  rotnum.comp(rotnum.r1x(), rotnum.r3x()))
+		assert.equals(rotnum.id(),  rotnum.comp(rotnum.r3x(), rotnum.r1x()))
+
+		assert.equals(rotnum.r1y(), rotnum.comp(rotnum.id(),  rotnum.r1y()))
+		assert.equals(rotnum.r2y(), rotnum.comp(rotnum.r1y(), rotnum.r1y()))
+		assert.equals(rotnum.r3y(), rotnum.comp(rotnum.r1y(), rotnum.r2y()))
+		assert.equals(rotnum.id(),  rotnum.comp(rotnum.r1y(), rotnum.r3y()))
+
+		assert.equals(rotnum.r1z(), rotnum.comp(rotnum.id(),  rotnum.r1z()))
+		assert.equals(rotnum.r2z(), rotnum.comp(rotnum.r1z(), rotnum.r1z()))
+		assert.equals(rotnum.r3z(), rotnum.comp(rotnum.r1z(), rotnum.r2z()))
+		assert.equals(rotnum.id(),  rotnum.comp(rotnum.r1z(), rotnum.r3z()))
+	end)
+
+	it("mirror_w()", function()
+		assert.equals(rotnum.id(), rotnum.comp(rotnum.mirror_x(), rotnum.mirror_x()))
+		assert.equals(rotnum.id(), rotnum.comp(rotnum.mirror_y(), rotnum.mirror_y()))
+		assert.equals(rotnum.id(), rotnum.comp(rotnum.mirror_z(), rotnum.mirror_z()))
+	end)
+end)

@@ -16,6 +16,9 @@ _G.minetest = {
 	end,
 }
 
+_G.vector = {metatable = {}}
+dofile("../../builtin/common/vector.lua") -- TODO: don't do this here
+
 dofile("init.lua")
 
 _G.minetest = nil

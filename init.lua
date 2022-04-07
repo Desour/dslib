@@ -8,12 +8,13 @@ local IE = minetest.request_insecure_environment()
 local has_IE = IE ~= nil
 
 dslib = {}
-dslib.version = "0.1.0"
+local dslib_version = "0.2.0"
+dslib.version = dslib_version
 dslib.internal = {}
 
 if has_IE then
 	IE.dslib_ie = {} -- _G == IE is possible, therefore not IE.dslib
-	IE.dslib_ie.version = "0.1.0"
+	IE.dslib_ie.version = dslib_version
 	IE.dslib_ie.internal = {}
 end
 
@@ -40,6 +41,11 @@ local submodules = {
 	},
 	["dslib:start_end"] = {
 		path = "src/start_end.lua",
+		needs_IE = false,
+		experimental = true,
+	},
+	["dslib:rotnum"] = {
+		path = "src/rotnum.lua",
 		needs_IE = false,
 		experimental = true,
 	},
