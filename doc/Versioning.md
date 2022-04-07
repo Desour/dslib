@@ -13,9 +13,11 @@ The plan on versioning is:
     * Otherwise, if something worth an update happened, the version jumps to
       `<maj>.<min>.<patch+1>`.
 * DSlib as a whole has a version:
-  * Whenever one (or more at once) modules increase their major, minor or patch
-    version number, the respective version number of DSlib is also incremented
-    by at least `1`.
+  * The major version stays at `0` until it becomes `1`. Then it stays `1`.
+  * Whenever one (or more at once) modules increase their major or minor version
+    number, the minor version number of DSlib is also incremented by at least `1`.
+  * Whenever one (or more at once) modules increase their patch version number,
+    the patch version number of DSlib is also incremented by at least `1`.
 
 As nobody enforces me to do this, it is likely this won't happen in practice for
 now.
