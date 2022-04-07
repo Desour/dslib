@@ -6,6 +6,8 @@
 -- Furthermore, it is suggested to use `"<modname>:internal.<...>"` for mod-internal
 -- stuff, and `"<modname>:api"` if the mod just wants to expose its api as a whole.
 --
+-- TODO: try_mrequire -> retval or nil, errmsg
+--
 -- @module dslib:mmodules
 
 -- nil
