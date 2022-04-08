@@ -306,7 +306,8 @@ end
 --
 -- This is a left-handed rotation in left-handed coord system (equals right-handed
 -- rotation in right-handed system).
--- Hence, it's a **left-handed (clockwise) rotation** in Minetest's left-handed system.
+-- Hence, it's a **left-handed rotation** in Minetest's left-handed system.
+-- (Left-handed rotation is clockwise if you look from the `+w` side.)
 --
 -- @treturn rotnum A constant.
 -- @function rotnum.rjw
@@ -358,40 +359,40 @@ end
 
 --- Alias for `rotnum.rjw()`.
 --
--- The second `w` is the one to replaced by `x, y, z`,
--- example: `rotnum.rcw1x == rotnum.r1x`
+-- The `l` stands for left-handed rotation in a left-handed coordinate system.
 --
--- @function rotnum.rcwjw
+-- Example: `rotnum.rl1x == rotnum.r1x`
+--
+-- @function rotnum.rljw
 
 --- Alias for `rotnum.r(4-j)w()`.
 --
--- The second `w` is the one to replaced by `x, y, z`,
--- example: `rotnum.rccw1x == rotnum.r3x`
+-- The second `r` stands for right-handed rotation in a left-handed coordinate system.
 --
--- @function rotnum.rccwjw
+-- Example: `rotnum.rr1x == rotnum.r3x`
+--
+-- @function rotnum.rrjw
 
--- TODO: replace cw with l and ccw with r?
+rotnum.rl1x = rotnum.r1x
+rotnum.rl2x = rotnum.r2x
+rotnum.rl3x = rotnum.r3x
+rotnum.rr1x = rotnum.r3x
+rotnum.rr2x = rotnum.r2x
+rotnum.rr3x = rotnum.r1x
 
-rotnum.rcw1x = rotnum.r1x
-rotnum.rcw2x = rotnum.r2x
-rotnum.rcw3x = rotnum.r3x
-rotnum.rccw1x = rotnum.r3x
-rotnum.rccw2x = rotnum.r2x
-rotnum.rccw3x = rotnum.r1x
+rotnum.rl1y = rotnum.r1y
+rotnum.rl2y = rotnum.r2y
+rotnum.rl3y = rotnum.r3y
+rotnum.rr1y = rotnum.r3y
+rotnum.rr2y = rotnum.r2y
+rotnum.rr3y = rotnum.r1y
 
-rotnum.rcw1y = rotnum.r1y
-rotnum.rcw2y = rotnum.r2y
-rotnum.rcw3y = rotnum.r3y
-rotnum.rccw1y = rotnum.r3y
-rotnum.rccw2y = rotnum.r2y
-rotnum.rccw3y = rotnum.r1y
-
-rotnum.rcw1z = rotnum.r1z
-rotnum.rcw2z = rotnum.r2z
-rotnum.rcw3z = rotnum.r3z
-rotnum.rccw1z = rotnum.r3z
-rotnum.rccw2z = rotnum.r2z
-rotnum.rccw3z = rotnum.r1z
+rotnum.rl1z = rotnum.r1z
+rotnum.rl2z = rotnum.r2z
+rotnum.rl3z = rotnum.r3z
+rotnum.rr1z = rotnum.r3z
+rotnum.rr2z = rotnum.r2z
+rotnum.rr3z = rotnum.r1z
 
 --- Rotates a multiple of `90` degrees around the +w axis.
 --
@@ -423,35 +424,33 @@ end
 
 --- Alias for `rotnum.rnw(n)`.
 --
--- The second `w` is the one to replaced by `x, y, z`,
--- example: `rotnum.rcwnx == rotnum.rnx`
+-- Example: `rotnum.rlnx == rotnum.rnx`
 --
 -- @tparam number n
 -- @treturn rotnum
--- @function rotnum.rcwnw
+-- @function rotnum.rlnw
 
-rotnum.rcwnx = rotnum.rnx
-rotnum.rcwny = rotnum.rny
-rotnum.rcwnz = rotnum.rnz
+rotnum.rlnx = rotnum.rnx
+rotnum.rlny = rotnum.rny
+rotnum.rlnz = rotnum.rnz
 
 --- Alias for `rotnum.rnw(-n)`.
 --
--- The second `w` is the one to replaced by `x, y, z`,
--- example: `rotnum.rccwnx`
+-- Example: `rotnum.rrnx`
 --
 -- @tparam number n
 -- @treturn rotnum
--- @function rotnum.rccwnw
+-- @function rotnum.rrnw
 
-function rotnum.rccwnx(n)
+function rotnum.rrnx(n)
 	return rx_by_n[math_floor((-n) % 4 + 1.5)]
 end
 
-function rotnum.rccwny(n)
+function rotnum.rrny(n)
 	return ry_by_n[math_floor((-n) % 4 + 1.5)]
 end
 
-function rotnum.rccwnz(n)
+function rotnum.rrnz(n)
 	return rz_by_n[math_floor((-n) % 4 + 1.5)]
 end
 
@@ -472,14 +471,14 @@ end
 -- @tparam number n
 -- @tparam string dir
 -- @treturn rotnum
--- @function rotnum.rcwn_around
-rotnum.rcwn_around = rotnum.rn_around
+-- @function rotnum.rln_around
+rotnum.rln_around = rotnum.rn_around
 
 --- Alias for `rotnum.rn_around(-n, dir)`.
 -- @tparam number n
 -- @tparam string dir
 -- @treturn rotnum
-function rotnum.rccwn_around(n, dir)
+function rotnum.rrn_around(n, dir)
 	return rw_by_n_by_dir[dir][math_floor((-n) % 4 + 1.5)]
 end
 
@@ -660,6 +659,8 @@ do
 	local function rotnum_to_euler_slow(rn)
 		-- use inverse to find out in what directions backward(+z), up(+y) and left(+x)
 		-- would be after rotation
+		-- (the "backward", etc., are assuming that if one places a node with facedir,
+		-- then its front face will look to the player)
 		local rni = rotnum.inv(rn)
 
 		local pitch, roll = 0, 0
