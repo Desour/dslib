@@ -20,6 +20,30 @@ describe("rotnum", function()
 		assert.equals(0x020, rotnum.comp(0x050, 0x060))
 	end)
 
+	it("inv()", function()
+		assert.equals(rotnum.r1x(), rotnum.inv(rotnum.r3x()))
+		assert.equals(rotnum.r2x(), rotnum.inv(rotnum.r2x()))
+		assert.equals(rotnum.r1y(), rotnum.inv(rotnum.r3y()))
+		assert.equals(rotnum.r2y(), rotnum.inv(rotnum.r2y()))
+		assert.equals(rotnum.r1z(), rotnum.inv(rotnum.r3z()))
+		assert.equals(rotnum.r2z(), rotnum.inv(rotnum.r2z()))
+
+		local rn1, rn2 = rotnum.r1x(), rotnum.r1y()
+		assert.equals(rotnum.inv(rotnum.comp(rn1, rn2)),
+				rotnum.comp(rotnum.inv(rn2), rotnum.inv(rn1)))
+
+		assert.equals(rotnum.id(), rotnum.comp(rn1, rotnum.inv(rn1)))
+	end)
+
+	it("can_inv()", function()
+		assert.True(rotnum.can_inv(rotnum.r1x()))
+		assert.True(rotnum.can_inv(rotnum.r2x()))
+		assert.True(rotnum.can_inv(rotnum.r3x()))
+		assert.True(rotnum.can_inv(rotnum.r1y()))
+		assert.True(rotnum.can_inv(rotnum.comp(rotnum.r1y(), rotnum.r3x())))
+		assert.True(rotnum.can_inv(rotnum.comp(rotnum.r1y(), rotnum.mirror_z())))
+	end)
+
 	it("rjw()", function()
 		assert.equals(rotnum.r1x(), rotnum.comp(rotnum.id(),  rotnum.r1x()))
 		assert.equals(rotnum.r1x(), rotnum.comp(rotnum.r1x(), rotnum.id()))

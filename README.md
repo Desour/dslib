@@ -41,6 +41,7 @@ here we go:
 
 * `dslib:mmodules`: An api to `dslib.mrequire()` (works almost like `require()`) and
   register modules.
+* `dslib:rotnum`: Helpers to make working with 90° rotations easy, ie. for facedir.
 * `dslib:raw_buffer`: TODO, experimental
 * `dslib:endian_helpers`: Functions for converting numbers between native,
   little and big endian-ness.
