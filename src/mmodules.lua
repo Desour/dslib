@@ -6,8 +6,6 @@
 -- Furthermore, it is suggested to use `"<modname>:internal.<...>"` for mod-internal
 -- stuff, and `"<modname>:api"` if the mod just wants to expose its api as a whole.
 --
--- TODO: try_mrequire -> retval or nil, errmsg
---
 -- @module dslib:mmodules
 
 -- nil
@@ -32,31 +30,39 @@ local function lookup_module_loader(name)
 	return nil
 end
 
-local function mrequire(name)
+local function try_mrequire(name)
 	-- check module status
 	local status = module_stati[name]
 
 	if status == "loaded" then
-		return module_retvals[name]
+		local retval = module_retvals[name]
+		if not retval then
+			return retval, "Loading failed in earlier attempt."
+		end
+		return retval
 	elseif status == "loading" then
-		error("require-loop detected", 2)
+		return nil, "require-loop detected"
 	end
 	assert(status == nil)
 
 	-- get the loader
 	local loader = lookup_module_loader(name)
 	if not loader then
-		error(string.format("module `%s` does not exist", name), 2)
+		return nil, "no loader for module"
 	end
 
 	-- load it
 	module_stati[name] = "loading"
-	local retval = loader(name)
+	local retval, errmsg = loader(name)
+	if retval == nil then
+		module_stati[name] = nil
+		return retval, errmsg
+	end
 
 	module_retvals[name] = retval
 	module_stati[name] = "loaded"
 
-	return retval
+	return retval, errmsg
 end
 
 
@@ -66,12 +72,27 @@ end
 -- more module stuff needs to be mrequired first
 
 local mmodules = {}
-mmodules.version = "0.1.0"
+mmodules.version = "0.2.0"
 
 --- An alias for `dslib.mrequire`.
 -- @param name See `dslib.mrequire`.
--- @function mmodules.mrequire
-mmodules.mrequire = mrequire
+function mmodules.mrequire(name)
+	local retval, errmsg = try_mrequire(name)
+	if not retval then
+		error(string.format("Failed to mrequire module '%s': %s", name, errmsg))
+	end
+	return retval
+end
+
+--- Tries to load a module.
+--
+-- Use this instead of `pcall`ing `mrequire`.
+--
+-- @param name See `mrequire`.
+-- @return The module's retval, or `nil` or `false` on failure.
+-- @return `nil` on success, otherwise the error message (a string).
+-- @function mmodules.try_mrequire
+mmodules.try_mrequire = try_mrequire
 
 -- query functions
 
@@ -103,8 +124,19 @@ end
 --- Adds a function to look for module loaders.
 --
 -- `func(module_name)` must either return nothing (=> no loader found) or return
--- a loader function `l`, such that `ret = l(module_name)` can be used to load
--- the module.
+-- a loader function.
+--
+-- Semantics of a loader function `l`:
+--
+-- * `retval, errmsg = l(module_name)` will be used by `try_mrequire` and `mrequire`
+--   to load the module.
+-- * If `retval` is `nil`, the loading fails, but `l` will be called again on
+--   another `try_mrequire` or `mrequire` call.
+-- * If `retval` is `false`, the loading fails, and no more attempts for loading
+--   the respective module will be made.
+-- * If `retval` is any other value, the loading succeeds and `retval` is the module's
+--   retval.
+-- * Iff the loading fails, `errmsg` should be a string indicating the error.
 --
 -- You will very likely not need this. Try `mmodules.add_module_by_loader` first.
 --
@@ -123,6 +155,7 @@ end)
 --- Adds a module with a loader function for it.
 --
 -- `loader(name)` will be called to load the module.
+-- See `add_module_loader_uplooker` for details on loader functions.
 --
 -- @tparam string name The name of the module.
 -- @tparam function loader Will be called to load the module.
@@ -133,8 +166,9 @@ end
 --- Adds a value as a module.
 --
 -- When loading, `value` will be returned.
+--
 -- @tparam string name The name of the module.
--- @param value The return value of the module.
+-- @param value The return value of the module. Must not be `nil` or `false`.
 function mmodules.add_module_by_value(name, value)
 	mmodules.add_module_by_loader(name, function()
 		return value
@@ -143,7 +177,9 @@ end
 
 --- Adds a module via its source code.
 --
--- When loading, the code will be loaded and executed.
+-- When loading, the code will be loaded and used as loader function.
+-- See `add_module_loader_uplooker` for details on loader functions.
+--
 -- @tparam string name The name of the module.
 -- @tparam string code_str The code.
 function mmodules.add_module_by_string(name, code_str)
@@ -154,7 +190,9 @@ end
 
 --- Adds a module via its file.
 --
--- When loading, the code in the file will be loaded and executed.
+-- When loading, the code in the file will be loaded and used as loader function.
+-- See `add_module_loader_uplooker` for details on loader functions.
+--
 -- @tparam string name The name of the module.
 -- @tparam string path The path of the file.
 function mmodules.add_module_by_file(name, path)

@@ -8,7 +8,7 @@ local IE = minetest.request_insecure_environment()
 local has_IE = IE ~= nil
 
 dslib = {}
-local dslib_version = "0.2.0"
+local dslib_version = "0.3.0"
 dslib.version = dslib_version
 dslib.internal = {}
 
@@ -176,32 +176,30 @@ local function my_module_loader(module_name)
 		error("can not happen")
 	end
 
-	-- remove any debug hook
-	(has_IE and IE.debug or _G.debug).sethook()
-
 	if module_info.experimental then
 		if not module_info.needs_IE then
 			if not dslib.internal.load_experimental_untrusted_modules then
-				error(string_format("tried to load (untrusted) experimental module '%s'",
-						module_name))
+				return false, "Tried to load (untrusted) experimental module."
 			end
 		else
 			if not IE.dslib_ie.internal.load_experimental_trusted_modules then
-				error(string_format("tried to load (trusted) experimental module '%s'",
-						module_name))
+				return false, "Tried to load (trusted) experimental module."
 			end
 		end
 	end
 
 	local path = dslib_modpath .. "/" .. module_info.path
 
-	if not module_info.needs_IE then -- TODO: check sha256sum here too, for consistency?
+	if not module_info.needs_IE then
+		-- raising an error if loadfile fails is ok, because it is very fatal
 		return assert(_G.loadfile(path))({})
 	end
 
+	-- remove any debug hook
+	IE.debug.sethook()
+
 	if not has_IE then
-		error(string_format("Can't load module %s without insecure environment.",
-				module_name))
+		return false, "Module needs the insecure environment, but dslib hasn't."
 	end
 
 	local file = IE.io.open(path, "r")
@@ -210,17 +208,14 @@ local function my_module_loader(module_name)
 	assert(type(code) == "string") -- I'm not sure if file.read can be overwritten.
 
 	if not skip_sha256_sums then
-		if not IE.dslib_ie.internal.sha256sum then
-			error(string_format("Can't load module %s: sha256sum function missing.",
-					module_name))
-		elseif not module_info.sha256sum then
-			error(string_format("Can't load module %s: sha256-sum missing.",
+		if not module_info.sha256sum then
+			error(string_format("sha256-sum missing for trusted module.",
 				module_name))
 		end
 		local hash = IE.dslib_ie.internal.sha256sum(code)
 		if hash ~= module_info.sha256sum then
-			error(string_format("Can't load module %s: wrong sha256-sum (%s instead of %s).",
-				module_name, hash, module_info.sha256sum))
+			error(string_format("Wrong sha256-sum (%s instead of %s).",
+				hash, module_info.sha256sum))
 		end
 	end
 
