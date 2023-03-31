@@ -15,6 +15,9 @@ Required Minetest version: >= 5.5.0
 to 5.5.0 is considered insecure. (Ie. because mods had access to `debug.setupvalue`
 and `debug.setlocal`.)
 
+This repo is hosted on Codeberg (<https://codeberg.org/Desour/dslib>), and there's
+a mirror on GitHub (<https://github.com/Desour/dslib>).
+
 
 # Info for non-modders
 
