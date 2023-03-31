@@ -12,7 +12,7 @@ A modding helper library for Minetest mods.
 Required Minetest version: >= 5.5.0
 
 **Warning**: Adding this mod to `secure.trusted_mods` in a Minetest version prior
-to 5.5.0 is considered insecure. (Ie. because mods had access to `debug.setupvalue`
+to 5.5.0 is considered insecure. (I.e. because mods had access to `debug.setupvalue`
 and `debug.setlocal`.)
 
 This repo is hosted on Codeberg (<https://codeberg.org/Desour/dslib>), and there's
