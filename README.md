@@ -16,7 +16,8 @@ to 5.5.0 is considered insecure. (I.e. because mods had access to `debug.setupva
 and `debug.setlocal`.)
 
 This repo is hosted on Codeberg (<https://codeberg.org/Desour/dslib>), and there's
-a mirror on GitHub (<https://github.com/Desour/dslib>).
+a mirror on GitHub (<https://github.com/Desour/dslib>). Issues and PRs are accepted
+in both locations.
 
 
 # Info for non-modders
