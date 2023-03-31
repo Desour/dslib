@@ -1,3 +1,8 @@
+<!--
+Copyright (C) 2023 DS
+
+SPDX-License-Identifier: CC0-1.0
+-->
 
 DSlib
 =====
@@ -99,7 +104,12 @@ Then open `doc/ldoc/index.html` with a web browser.
 
 # License
 
-The MIT License (Expat) is used. See `LICENSE.txt`.
+The relevant code is licensed under Apache-2.0.
+
+Everything else is CC0-1.0.
+
+Comment for adding a license header:
+`$ reuse annotate --template=mytemplate --copyright-style=string-c --license="Apache-2.0" --copyright="YOUR NAME" FILES`
 
 
 # Reporting security issues

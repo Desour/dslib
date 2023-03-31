@@ -1,3 +1,18 @@
+-- Copyright (C) 2023 DS
+--
+-- SPDX-License-Identifier: Apache-2.0
+--
+-- Licensed under the Apache License, Version 2.0 (the "License");
+-- you may not use this file except in compliance with the License.
+-- You may obtain a copy of the License at
+--
+--     http://www.apache.org/licenses/LICENSE-2.0
+--
+-- Unless required by applicable law or agreed to in writing, software
+-- distributed under the License is distributed on an "AS IS" BASIS,
+-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+-- See the License for the specific language governing permissions and
+-- limitations under the License.
 
 --- The init.
 -- This module is already loaded as global `dslib`.
@@ -25,7 +40,7 @@ local submodules = {
 	["dslib:raw_buffer"] = {
 		path = "src/raw_buffer.lua",
 		needs_IE = true,
-		sha256sum = "52a03505dc0a4e69ebaf555d962c7afcdb45a7d2e18a70025874aed351d7c8bd",
+		sha256sum = "5baf39067bb42b7ddacbb413db5ec11a785f4e990005f6a9a6336ca014127811",
 		experimental = true,
 	},
 	["dslib:endian_helpers"] = {
@@ -36,7 +51,7 @@ local submodules = {
 	["dslib:new_luajit_stuff"] = {
 		path = "src/new_luajit_stuff.lua",
 		needs_IE = true,
-		sha256sum = "4b557ed8cf7f4cec6f08874e7043898d89839ca919c9ceefe8118d45cb5cc7d3",
+		sha256sum = "33a70464f995aa4280e942d4bd1bdf368145c9580ef973eacd46ffe43de32ac2",
 		experimental = true,
 	},
 	["dslib:start_end"] = {

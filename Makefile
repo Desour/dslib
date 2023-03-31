@@ -1,3 +1,6 @@
+# Copyright (C) 2023 DS
+#
+# SPDX-License-Identifier: CC0-1.0
 
 .PHONY: default clean doc clean_doc test run_static_checks run_unittests
 
