@@ -46,7 +46,8 @@ here we go:
 * `dslib:endian_helpers`: Functions for converting numbers between native,
   little and big endian-ness.
 * `dslib:new_luajit_stuff`: Extensions from new LuaJIT (ie. `table.new()`).
-* TODO: more fine grained depends
+* `dslib:fmt`: Text formatting. (unfinished)
+* TODO: module for more fine grained depends
 
 
 # Qualities

@@ -49,6 +49,11 @@ local submodules = {
 		needs_IE = false,
 		experimental = true,
 	},
+	["dslib:fmt"] = {
+		path = "src/fmt.lua",
+		needs_IE = false,
+		experimental = true,
+	},
 }
 
 -- Only set to true while you are developing.

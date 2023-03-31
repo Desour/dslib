@@ -1,0 +1,42 @@
+
+[fmt]
+
+#    Map a log output level of some (or all) mods to a different level.
+#
+#    This only applies to the functions returned from fmt.get_loggers_for_mod().
+#
+#    If given, a mod will log the messages it would normally log to <level> instead
+#    to level <this setting>[<modname>][<level>] or <this setting>.global[<level>].
+#
+#    For completely disabling the output, set to "quiet". (Not to "none". "none"
+#    is the level-less level.)
+#
+#    Rationale: Some mod might be very loud and you want it to shut up, or you
+#    want to get more info about some mods, but not all. global can be useful
+#    if you only want to see messages from the engine.
+#
+#    Requires a server restart to apply.
+#
+#    minetest.deserialize() is used. (I'd make the setting secure, but the main
+#    menu (and perhaps also other parts of minetest) don't allow that, sorry.)
+dslib.fmt.log_level_mappings (Log level mappings) string {global = {none="none",error="error",warning="warning",action="action",info="info",verbose="verbose"}, mods = {}}
+
+#    For performance reasons, the log functions in dslib:fmt don't actually call
+#    minetest.log() if the debug and chat log level are higher than the given
+#    level. However, this is not perfect, i.e. there are other destinations for
+#    logging, and also the log level minimum might change over time.
+#    This setting therefore lets you specify a minimum non-ignored level.
+#
+#    One of:
+#    -    <nothing> (ignore any)
+#    -    none (messages with no level)
+#    -    error
+#    -    warning
+#    -    action
+#    -    info
+#    -    verbose
+#    -    trace
+#
+#    Requires a server restart to apply.
+dslib.fmt.nonignore_log_level (Non-ignore log level) enum action ,none,error,warning,action,info,verbose,trace
+
