@@ -26,9 +26,10 @@ pipeline:
   run_busted:
     image: alpine
     commands:
-      - apk --no-cache add build-base curl luajit lua5.1-dev luarocks5.1 openssl-dev
+      - apk --no-cache add build-base curl luajit lua5.1-dev luarocks5.1 openssl-dev lua5.1-bitop
       - luarocks-5.1 install busted
+      - luarocks-5.1 install luabitop
       - curl -o vector.lua https://raw.githubusercontent.com/minetest/minetest/stable-5/builtin/common/vector.lua
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua busted --lua=/usr/bin/luajit .
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 busted --lua=/usr/bin/luajit .
-      - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 busted --exclude-pattern=".*_onlyjit_spec%.lua" .
+      - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 DSLIB_LUAD_BITOP=1 busted --exclude-pattern=".*_onlyjit_spec%.lua" .

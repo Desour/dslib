@@ -60,6 +60,10 @@ local path_to_minetest_vector = os.getenv("DSLIB_PATH_TO_MINETEST_VECTOR") or ".
 _G.vector = {metatable = {}}
 dofile(path_to_minetest_vector)
 
+if os.getenv("DSLIB_LOAD_BITOP") == "1" then
+	_G.bit = require("bit")
+end
+
 dofile("init.lua")
 
 -- keep _G.minetest, as some modules require it to load
