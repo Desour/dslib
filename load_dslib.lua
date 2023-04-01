@@ -23,9 +23,12 @@
 assert(not _G.minetest)
 _G.minetest = {
 	is_fake = true,
+	-- DSlib requires ssl and luajit if it has the IE.
+	-- (Unittests are run with on and off.)
+	dslib_dont_use_ie = os.getenv("DSLIB_DONT_USE_IE") == "1",
 
 	request_insecure_environment = function()
-		return _G
+		return (not _G.minetest.dslib_dont_use_ie) and _G or nil
 	end,
 
 	get_modpath = function(modname)
@@ -53,7 +56,7 @@ _G.table.key_value_swap = function(t)
 	return ret
 end
 
-local path_to_minetest_vector = os.getenv("PATH_TO_MINETEST_VECTOR") or "../../builtin/common/vector.lua"
+local path_to_minetest_vector = os.getenv("DSLIB_PATH_TO_MINETEST_VECTOR") or "../../builtin/common/vector.lua"
 _G.vector = {metatable = {}}
 dofile(path_to_minetest_vector)
 

@@ -24,14 +24,10 @@ pipeline:
     commands:
       - luacheck .
   run_busted_jit:
-    image: akorn/luarocks:luajit2.1-alpine
+    image: alpine
     commands:
-      - apk --no-cache add build-base wget
+      - apk --no-cache add build-base curl luajit luarocks libssl3
       - luarocks install busted
-      - wget https://raw.githubusercontent.com/minetest/minetest/stable-5/builtin/common/vector.lua
-      - PATH_TO_MINETEST_VECTOR=vector.lua busted .
-  #~ run_busted_puc:
-    #~ image: akorn/luarocks:lua5.1-alpine
-    #~ commands:
-      #~ - luarocks install busted
-      #~ - busted .
+      - curl -o vector.lua https://raw.githubusercontent.com/minetest/minetest/stable-5/builtin/common/vector.lua
+      - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua busted .
+      - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 busted .
