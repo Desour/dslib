@@ -15,7 +15,7 @@
 # limitations under the License.
 
 pipeline:
-	run_luacheck:
-		image: registry.gitlab.com/pipeline-components/luacheck:latest
-		commands:
-			- luacheck .
+  run_luacheck:
+    image: registry.gitlab.com/pipeline-components/luacheck:latest
+    commands:
+      - luacheck .
