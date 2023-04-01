@@ -17,6 +17,8 @@
 -- limitations under the License.
 
 -- Use this if you want to use dslib without minetest.
+-- (For now, this pollutes the global env. And you have to set PATH_TO_MINETEST_VECTOR.
+-- So, this is sadly not too well suited for anything but the unittests.)
 
 assert(not _G.minetest)
 _G.minetest = {
@@ -51,8 +53,9 @@ _G.table.key_value_swap = function(t)
 	return ret
 end
 
+local path_to_minetest_vector = os.getenv("PATH_TO_MINETEST_VECTOR") or "../../builtin/common/vector.lua"
 _G.vector = {metatable = {}}
-dofile("../../builtin/common/vector.lua") -- TODO: don't do this here
+dofile(path_to_minetest_vector)
 
 dofile("init.lua")
 

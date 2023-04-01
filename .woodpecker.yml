@@ -26,9 +26,10 @@ pipeline:
   run_busted_jit:
     image: akorn/luarocks:luajit2.1-alpine
     commands:
-      - apk --no-cache add build-base
+      - apk --no-cache add build-base wget
       - luarocks install busted
-      - busted .
+      - wget https://raw.githubusercontent.com/minetest/minetest/stable-5/builtin/common/vector.lua
+      - PATH_TO_MINETEST_VECTOR=vector.lua busted .
   #~ run_busted_puc:
     #~ image: akorn/luarocks:lua5.1-alpine
     #~ commands:
