@@ -17,13 +17,18 @@
 -- limitations under the License.
 
 -- Use this if you want to use dslib without minetest.
+-- (For now, this pollutes the global env. And you have to set PATH_TO_MINETEST_VECTOR.
+-- So, this is sadly not too well suited for anything but the unittests.)
 
 assert(not _G.minetest)
 _G.minetest = {
 	is_fake = true,
+	-- DSlib requires ssl and luajit if it has the IE.
+	-- (Unittests are run with on and off.)
+	dslib_dont_use_ie = os.getenv("DSLIB_DONT_USE_IE") == "1",
 
 	request_insecure_environment = function()
-		return _G
+		return (not _G.minetest.dslib_dont_use_ie) and _G or nil
 	end,
 
 	get_modpath = function(modname)
@@ -51,8 +56,13 @@ _G.table.key_value_swap = function(t)
 	return ret
 end
 
+local path_to_minetest_vector = os.getenv("DSLIB_PATH_TO_MINETEST_VECTOR") or "../../builtin/common/vector.lua"
 _G.vector = {metatable = {}}
-dofile("../../builtin/common/vector.lua") -- TODO: don't do this here
+dofile(path_to_minetest_vector)
+
+if os.getenv("DSLIB_LOAD_BITOP") == "1" then
+	_G.bit = require("bit")
+end
 
 dofile("init.lua")
 

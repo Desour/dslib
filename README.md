@@ -19,6 +19,8 @@ This repo is hosted on Codeberg (<https://codeberg.org/Desour/dslib>), and there
 a mirror on GitHub (<https://github.com/Desour/dslib>). Issues and PRs are accepted
 in both locations.
 
+[![status-badge](https://ci.codeberg.org/api/badges/Desour/dslib/status.svg)](https://ci.codeberg.org/Desour/dslib)
+
 
 # Info for non-modders
 
