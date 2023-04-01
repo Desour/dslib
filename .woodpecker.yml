@@ -26,7 +26,7 @@ pipeline:
   run_busted_jit:
     image: alpine
     commands:
-      - apk --no-cache add build-base curl luajit luarocks libssl3
+      - apk --no-cache add build-base curl luajit luarocks5.1 libssl3
       - luarocks install busted
       - curl -o vector.lua https://raw.githubusercontent.com/minetest/minetest/stable-5/builtin/common/vector.lua
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua busted .
