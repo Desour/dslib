@@ -15,11 +15,21 @@
 # limitations under the License.
 
 pipeline:
+  run_reuse:
+    image: fsfe/reuse
+    commands:
+      - reuse lint
   run_luacheck:
     image: registry.gitlab.com/pipeline-components/luacheck:latest
     commands:
       - luacheck .
-  run_busted:
-    image: imega/busted
+  run_busted_jit:
+    image: akorn/luarocks:luajit2.1-alpine
     commands:
+      - luarocks install busted
+      - busted .
+  run_busted_puc:
+    image: akorn/luarocks:lua5.1-alpine
+    commands:
+      - luarocks install busted
       - busted .
