@@ -68,3 +68,6 @@ pipeline:
       - git push
     when:
       branch: master
+
+branches:
+  exclude: [ pages ]
