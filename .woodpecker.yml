@@ -5,3 +5,6 @@ pipeline:
     image: alpine
     commands:
       - echo this is fine
+
+branches:
+  exclude: [ pages ]
