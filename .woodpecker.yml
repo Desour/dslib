@@ -32,3 +32,9 @@ pipeline:
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua busted --lua=/usr/bin/luajit .
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 busted --lua=/usr/bin/luajit .
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 DSLIB_LOAD_BITOP=1 busted --exclude-pattern=".*_onlyjit_spec%.lua" .
+  create_doc:
+    image: alpine
+    commands:
+      - apk --no-cache add build-base luajit lua5.1-dev luarocks5.1
+      - luarocks-5.1 install ldoc
+      - ldoc .
