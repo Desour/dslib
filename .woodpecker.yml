@@ -1,3 +1,7 @@
 # just a dummy
 
 pipeline:
+  do_nothing:
+    image: alpine
+    commands:
+      - echo this is fine
