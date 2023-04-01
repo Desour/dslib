@@ -17,7 +17,7 @@
 dofile("load_dslib.lua")
 
 if minetest.dslib_dont_use_ie then
-	return -- skip tests
+	return -- skip test
 end
 
 _G.dslib_ie.internal.load_experimental_trusted_modules = true
