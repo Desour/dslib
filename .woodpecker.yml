@@ -56,7 +56,7 @@ pipeline:
       - git remote set-url origin https://$CBTOKEN@codeberg.org/Desour/dslib.git
       - cd ..
       # Run ldoc
-      - ldoc -o . .
+      - ldoc -o _site .
       # Push to target
       - cd _site
       - git add --all
