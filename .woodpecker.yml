@@ -66,3 +66,5 @@ pipeline:
       - git add --all
       - git commit -m "Woodpecker CI ldoc Build at $( env TZ=Europe/Berlin date +"%Y-%m-%d %X %Z" )"
       - git push
+    when:
+      branch: master
