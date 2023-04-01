@@ -20,13 +20,11 @@ pipeline:
     image: fsfe/reuse
     commands:
       - reuse lint
-
   run_luacheck:
     group: justdoallatonce
     image: registry.gitlab.com/pipeline-components/luacheck:latest
     commands:
       - luacheck .
-
   run_busted:
     group: justdoallatonce
     image: alpine
@@ -37,7 +35,6 @@ pipeline:
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua busted --lua=/usr/bin/luajit .
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 busted --lua=/usr/bin/luajit .
       - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 DSLIB_LOAD_BITOP=1 busted --exclude-pattern=".*_onlyjit_spec%.lua" .
-
   create_doc:
     # Note: This step is mostly copied from here:
     # https://codeberg.org/Codeberg-CI/examples/src/branch/main/Jekyll/jekyll.yml
