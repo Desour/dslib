@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Source</h2>
+<ul class="nowrap">
+  <li><a href="../source/init.lua.html">init.lua</a></li>
+  <li><a href="../source/endian_helpers.lua.html">endian_helpers.lua</a></li>
+  <li><a href="../source/fmt.lua.html">fmt.lua</a></li>
+  <li><a href="../source/mmodules.lua.html">mmodules.lua</a></li>
+  <li><strong>new_luajit_stuff.lua</strong></li>
+  <li><a href="../source/raw_buffer.lua.html">raw_buffer.lua</a></li>
+  <li><a href="../source/rotnum.lua.html">rotnum.lua</a></li>
+  <li><a href="../source/start_end.lua.html">start_end.lua</a></li>
+  <li><a href="../source/blups.lua.html">blups.lua</a></li>
+  <li><a href="../source/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../source/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>new_luajit_stuff.lua</h2>
+<pre>
+<span class="comment">-- Copyright (C) 2023 DS
+</span><span class="comment">--
+</span><span class="comment">-- SPDX-License-Identifier: Apache-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Licensed under the Apache License, Version 2.0 (the "License");
+</span><span class="comment">-- you may not use this file except in compliance with the License.
+</span><span class="comment">-- You may obtain a copy of the License at
+</span><span class="comment">--
+</span><span class="comment">--     http://www.apache.org/licenses/LICENSE-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Unless required by applicable law or agreed to in writing, software
+</span><span class="comment">-- distributed under the License is distributed on an "AS IS" BASIS,
+</span><span class="comment">-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+</span><span class="comment">-- See the License for the specific language governing permissions and
+</span><span class="comment">-- limitations under the License.
+</span>
+<span class="comment">--- Exposes secure parts of extensions from new LuaJIT versions.
+</span><span class="comment">--
+</span><span class="comment">-- See &lt;https://repo.or.cz/luajit-2.0.git/blob_plain/refs/heads/v2.1:/doc/extensions.html&gt;
+</span><span class="comment">-- for details of individual functions.
+</span><span class="comment">--
+</span><span class="comment">-- @module dslib:new_luajit_stuff
+</span>
+<span class="keyword">local</span> load_vars = ...
+<span class="keyword">local</span> IE = load_vars.IE
+_G.<span class="global">assert</span>(IE ~= <span class="keyword">nil</span>, <span class="string">"This module needs the insecure environment."</span>)
+
+<span class="keyword">local</span> new_luajit_stuff = {}
+new_luajit_stuff.version = <span class="string">"0.1.0"</span>
+
+IE.<span class="global">pcall</span>(IE.dslib_ie.internal.require_with_IE_env, <span class="string">"table.new"</span>)
+
+<span class="comment">--- The <code>table.new</code> function.
+</span><span class="comment">--
+</span><span class="comment">-- Returns an empty new table if <code>table.new</code> was not found.
+</span><a id="37"></a><span class="comment">-- @function table_new
+</span>new_luajit_stuff.table_new = IE.<span class="global">table</span>.new <span class="keyword">or</span> <span class="keyword">function</span>() <span class="keyword">return</span> {} <span class="keyword">end</span>
+
+<span class="keyword">return</span> new_luajit_stuff</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

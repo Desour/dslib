@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Source</h2>
+<ul class="nowrap">
+  <li><a href="../source/init.lua.html">init.lua</a></li>
+  <li><a href="../source/endian_helpers.lua.html">endian_helpers.lua</a></li>
+  <li><a href="../source/fmt.lua.html">fmt.lua</a></li>
+  <li><strong>mmodules.lua</strong></li>
+  <li><a href="../source/new_luajit_stuff.lua.html">new_luajit_stuff.lua</a></li>
+  <li><a href="../source/raw_buffer.lua.html">raw_buffer.lua</a></li>
+  <li><a href="../source/rotnum.lua.html">rotnum.lua</a></li>
+  <li><a href="../source/start_end.lua.html">start_end.lua</a></li>
+  <li><a href="../source/blups.lua.html">blups.lua</a></li>
+  <li><a href="../source/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../source/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>mmodules.lua</h2>
+<pre>
+<span class="comment">-- Copyright (C) 2023 DS
+</span><span class="comment">--
+</span><span class="comment">-- SPDX-License-Identifier: Apache-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Licensed under the Apache License, Version 2.0 (the "License");
+</span><span class="comment">-- you may not use this file except in compliance with the License.
+</span><span class="comment">-- You may obtain a copy of the License at
+</span><span class="comment">--
+</span><span class="comment">--     http://www.apache.org/licenses/LICENSE-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Unless required by applicable law or agreed to in writing, software
+</span><span class="comment">-- distributed under the License is distributed on an "AS IS" BASIS,
+</span><span class="comment">-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+</span><span class="comment">-- See the License for the specific language governing permissions and
+</span><span class="comment">-- limitations under the License.
+</span>
+<span class="comment">--- A module for registering new modules.
+</span><span class="comment">--
+</span><span class="comment">-- As a convention, module names begin with <code>&quot;&amp;lt;modname&amp;gt;:&quot;</code>.
+</span><span class="comment">--
+</span><span class="comment">-- Furthermore, it is suggested to use <code>&quot;&amp;lt;modname&amp;gt;:internal.&amp;lt;...&amp;gt;&quot;</code> for mod-internal
+</span><span class="comment">-- stuff, and <code>&quot;&amp;lt;modname&amp;gt;:api&quot;</code> if the mod just wants to expose its api as a whole.
+</span><span class="comment">--
+</span><span class="comment">-- @module dslib:mmodules
+</span>
+<span class="comment">-- nil
+</span><span class="comment">-- --register--&gt; nil
+</span><span class="comment">-- --mrequire started--&gt; "loading"
+</span><span class="comment">-- --mrequire finished--&gt; "loaded"
+</span><span class="keyword">local</span> module_stati = {}
+
+<span class="comment">-- cached retvals of modules
+</span><span class="comment">-- (only one retval per module)
+</span><span class="keyword">local</span> module_retvals = {}
+
+<span class="keyword">local</span> module_loader_uplookers = {}
+
+<span class="keyword">local</span> <span class="keyword">function</span> lookup_module_loader(name)
+	<span class="keyword">for</span> _, l <span class="keyword">in</span> <span class="global">ipairs</span>(module_loader_uplookers) <span class="keyword">do</span>
+		<span class="keyword">local</span> r = l(name)
+		<span class="keyword">if</span> r <span class="keyword">then</span>
+			<span class="keyword">return</span> r
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+	<span class="keyword">return</span> <span class="keyword">nil</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> try_mrequire(name)
+	<span class="comment">-- check module status
+</span>	<span class="keyword">local</span> status = module_stati[name]
+
+	<span class="keyword">if</span> status == <span class="string">"loaded"</span> <span class="keyword">then</span>
+		<span class="keyword">local</span> retval = module_retvals[name]
+		<span class="keyword">if</span> <span class="keyword">not</span> retval <span class="keyword">then</span>
+			<span class="keyword">return</span> retval, <span class="string">"Loading failed in earlier attempt."</span>
+		<span class="keyword">end</span>
+		<span class="keyword">return</span> retval
+	<span class="keyword">elseif</span> status == <span class="string">"loading"</span> <span class="keyword">then</span>
+		<span class="keyword">return</span> <span class="keyword">nil</span>, <span class="string">"require-loop detected"</span>
+	<span class="keyword">end</span>
+	<span class="global">assert</span>(status == <span class="keyword">nil</span>)
+
+	<span class="comment">-- get the loader
+</span>	<span class="keyword">local</span> loader = lookup_module_loader(name)
+	<span class="keyword">if</span> <span class="keyword">not</span> loader <span class="keyword">then</span>
+		<span class="keyword">return</span> <span class="keyword">nil</span>, <span class="string">"no loader for module"</span>
+	<span class="keyword">end</span>
+
+	<span class="comment">-- load it
+</span>	module_stati[name] = <span class="string">"loading"</span>
+	<span class="keyword">local</span> retval, errmsg = loader(name)
+	<span class="keyword">if</span> retval == <span class="keyword">nil</span> <span class="keyword">then</span>
+		module_stati[name] = <span class="keyword">nil</span>
+		<span class="keyword">return</span> retval, errmsg
+	<span class="keyword">end</span>
+
+	module_retvals[name] = retval
+	module_stati[name] = <span class="string">"loaded"</span>
+
+	<span class="keyword">return</span> retval, errmsg
+<span class="keyword">end</span>
+
+
+<span class="comment">-- ------------------------------------------------------------------------------
+</span><span class="comment">-- the mmodules module
+</span><span class="comment">-- ===================
+</span><span class="comment">-- more module stuff needs to be mrequired first
+</span>
+<span class="keyword">local</span> mmodules = {}
+mmodules.version = <span class="string">"0.2.0"</span>
+
+<span class="comment">--- An alias for <a href="../modules/dslib.html#mrequire">dslib.mrequire</a>.
+</span><a id="94"></a><span class="comment">-- @param name See <a href="../modules/dslib.html#mrequire">dslib.mrequire</a>.
+</span><span class="keyword">function</span> mmodules.mrequire(name)
+	<span class="keyword">local</span> retval, errmsg = try_mrequire(name)
+	<span class="keyword">if</span> <span class="keyword">not</span> retval <span class="keyword">then</span>
+		<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"Failed to mrequire module '%s': %s"</span>, name, errmsg))
+	<span class="keyword">end</span>
+	<span class="keyword">return</span> retval
+<span class="keyword">end</span>
+
+<span class="comment">--- Tries to load a module.
+</span><span class="comment">--
+</span><span class="comment">-- Use this instead of <a href="https://www.lua.org/manual/5.1/manual.html#pdf-pcall">pcall</a>ing <code>mrequire</code>.
+</span><span class="comment">--
+</span><span class="comment">-- @param name See <code>mrequire</code>.
+</span><span class="comment">-- @return The module's retval, or <code>nil</code> or <code>false</code> on failure.
+</span><span class="comment">-- @return <code>nil</code> on success, otherwise the error message (a string).
+</span><a id="110"></a><span class="comment">-- @function mmodules.try_mrequire
+</span>mmodules.try_mrequire = try_mrequire
+
+<span class="comment">-- query functions
+</span>
+<span class="comment">--- Checks if a module is loaded.
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><a id="117"></a><span class="comment">-- @treturn bool Whether module <code>name</code> was loaded.
+</span><span class="keyword">function</span> mmodules.is_loaded(name)
+	<span class="keyword">return</span> module_stati[name] == <span class="string">"loaded"</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Checks if a module is currently loading.
+</span><span class="comment">--
+</span><span class="comment">-- <code>dslib.mrequire(name)</code> was called, but didn't return yet.
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><a id="126"></a><span class="comment">-- @treturn bool Whether module <code>name</code> is currently loading.
+</span><span class="keyword">function</span> mmodules.is_loading(name)
+	<span class="keyword">return</span> module_stati[name] == <span class="string">"loading"</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Checks if a module was registered.
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><a id="133"></a><span class="comment">-- @treturn bool Whether module <code>name</code> is registered.
+</span><span class="keyword">function</span> mmodules.exists(name)
+	<span class="keyword">return</span> module_stati[name] ~= <span class="keyword">nil</span> <span class="keyword">or</span> lookup_module_loader(name) ~= <span class="keyword">nil</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- stuff for adding new modules
+</span>
+<span class="comment">--- Adds a function to look for module loaders.
+</span><span class="comment">--
+</span><span class="comment">-- <code>func(module_name)</code> must either return nothing (=&gt; no loader found) or return
+</span><span class="comment">-- a loader function.
+</span><span class="comment">--
+</span><span class="comment">-- Semantics of a loader function <code>l</code>:
+</span><span class="comment">--
+</span><span class="comment">-- * <code>retval, errmsg = l(module_name)</code> will be used by <code>try_mrequire</code> and <code>mrequire</code>
+</span><span class="comment">--   to load the module.
+</span><span class="comment">-- * If <code>retval</code> is <code>nil</code>, the loading fails, but <code>l</code> will be called again on
+</span><span class="comment">--   another <code>try_mrequire</code> or <code>mrequire</code> call.
+</span><span class="comment">-- * If <code>retval</code> is <code>false</code>, the loading fails, and no more attempts for loading
+</span><span class="comment">--   the respective module will be made.
+</span><span class="comment">-- * If <code>retval</code> is any other value, the loading succeeds and <code>retval</code> is the module's
+</span><span class="comment">--   retval.
+</span><span class="comment">-- * Iff the loading fails, <code>errmsg</code> should be a string indicating the error.
+</span><span class="comment">--
+</span><span class="comment">-- You will very likely not need this. Try <code>mmodules.add_module_by_loader</code> first.
+</span><span class="comment">--
+</span><a id="159"></a><span class="comment">-- @tparam function func The uplooker function.
+</span><span class="keyword">function</span> mmodules.add_module_loader_uplooker(func)
+	<span class="global">table</span>.insert(module_loader_uplookers, func)
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> named_module_loaders = {}
+mmodules.add_module_loader_uplooker(<span class="keyword">function</span>(name)
+	<span class="keyword">local</span> l = named_module_loaders[name]
+	named_module_loaders[name] = <span class="keyword">nil</span> <span class="comment">-- free resources
+</span>	<span class="keyword">return</span> l
+<span class="keyword">end</span>)
+
+<span class="comment">--- Adds a module with a loader function for it.
+</span><span class="comment">--
+</span><span class="comment">-- <code>loader(name)</code> will be called to load the module.
+</span><span class="comment">-- See <code>add_module_loader_uplooker</code> for details on loader functions.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><a id="177"></a><span class="comment">-- @tparam function loader Will be called to load the module.
+</span><span class="keyword">function</span> mmodules.add_module_by_loader(name, loader)
+	named_module_loaders[name] = loader
+<span class="keyword">end</span>
+
+<span class="comment">--- Adds a value as a module.
+</span><span class="comment">--
+</span><span class="comment">-- When loading, <code>value</code> will be returned.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><a id="187"></a><span class="comment">-- @param value The return value of the module. Must not be <code>nil</code> or <code>false</code>.
+</span><span class="keyword">function</span> mmodules.add_module_by_value(name, value)
+	mmodules.add_module_by_loader(name, <span class="keyword">function</span>()
+		<span class="keyword">return</span> value
+	<span class="keyword">end</span>)
+<span class="keyword">end</span>
+
+<span class="comment">--- Adds a module via its source code.
+</span><span class="comment">--
+</span><span class="comment">-- When loading, the code will be loaded and used as loader function.
+</span><span class="comment">-- See <code>add_module_loader_uplooker</code> for details on loader functions.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><a id="200"></a><span class="comment">-- @tparam string code_str The code.
+</span><span class="keyword">function</span> mmodules.add_module_by_string(name, code_str)
+	mmodules.add_module_by_loader(name, <span class="keyword">function</span>()
+		<span class="keyword">return</span> <span class="global">assert</span>(<span class="global">loadstring</span>(code_str, <span class="global">string</span>.format(<span class="string">"mmodule `%s`"</span>, name)))()
+	<span class="keyword">end</span>)
+<span class="keyword">end</span>
+
+<span class="comment">--- Adds a module via its file.
+</span><span class="comment">--
+</span><span class="comment">-- When loading, the code in the file will be loaded and used as loader function.
+</span><span class="comment">-- See <code>add_module_loader_uplooker</code> for details on loader functions.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><a id="213"></a><span class="comment">-- @tparam string path The path of the file.
+</span><span class="keyword">function</span> mmodules.add_module_by_file(name, path)
+	mmodules.add_module_by_loader(name, <span class="keyword">function</span>()
+		<span class="keyword">return</span> <span class="global">dofile</span>(path)
+	<span class="keyword">end</span>)
+<span class="keyword">end</span>
+
+
+<span class="keyword">return</span> mmodules</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

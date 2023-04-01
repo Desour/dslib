@@ -1,0 +1,431 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><strong>dslib:mmodules</strong></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>dslib:mmodules</code></h1>
+<p>A module for registering new modules.</p>
+<p> As a convention, module names begin with <code>&quot;&lt;modname&gt;:&quot;</code>.</p>
+
+<p> Furthermore, it is suggested to use <code>&quot;&lt;modname&gt;:internal.&lt;...&gt;&quot;</code> for mod-internal
+ stuff, and <code>&quot;&lt;modname&gt;:api&quot;</code> if the mod just wants to expose its api as a whole.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#mrequire">mrequire (name)</a></td>
+	<td class="summary">An alias for <a href="../modules/dslib.html#mrequire">dslib.mrequire</a>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#try_mrequire">try_mrequire (name)</a></td>
+	<td class="summary">Tries to load a module.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_loaded">is_loaded (name)</a></td>
+	<td class="summary">Checks if a module is loaded.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_loading">is_loading (name)</a></td>
+	<td class="summary">Checks if a module is currently loading.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#exists">exists (name)</a></td>
+	<td class="summary">Checks if a module was registered.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#add_module_loader_uplooker">add_module_loader_uplooker (func)</a></td>
+	<td class="summary">Adds a function to look for module loaders.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#add_module_by_loader">add_module_by_loader (name, loader)</a></td>
+	<td class="summary">Adds a module with a loader function for it.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#add_module_by_value">add_module_by_value (name, value)</a></td>
+	<td class="summary">Adds a value as a module.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#add_module_by_string">add_module_by_string (name, code_str)</a></td>
+	<td class="summary">Adds a module via its source code.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#add_module_by_file">add_module_by_file (name, path)</a></td>
+	<td class="summary">Adds a module via its file.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "mrequire"></a>
+    <strong>mrequire (name)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#94">line 94</a>
+    </dt>
+    <dd>
+    An alias for <a href="../modules/dslib.html#mrequire">dslib.mrequire</a>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         See <a href="../modules/dslib.html#mrequire">dslib.mrequire</a>.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "try_mrequire"></a>
+    <strong>try_mrequire (name)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#110">line 110</a>
+    </dt>
+    <dd>
+    Tries to load a module. </p>
+
+<p> Use this instead of <a href="https://www.lua.org/manual/5.1/manual.html#pdf-pcall">pcall</a>ing <a href="../modules/dslib:mmodules.html#mrequire">mrequire</a>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+         See <a href="../modules/dslib:mmodules.html#mrequire">mrequire</a>.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        The module's retval, or <code>nil</code> or <code>false</code> on failure.</li>
+        <li>
+        <code>nil</code> on success, otherwise the error message (a string).</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_loaded"></a>
+    <strong>is_loaded (name)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#117">line 117</a>
+    </dt>
+    <dd>
+    Checks if a module is loaded.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the module.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        Whether module <code>name</code> was loaded.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_loading"></a>
+    <strong>is_loading (name)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#126">line 126</a>
+    </dt>
+    <dd>
+    Checks if a module is currently loading. </p>
+
+<p> <code>dslib.mrequire(name)</code> was called, but didn't return yet.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the module.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        Whether module <code>name</code> is currently loading.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "exists"></a>
+    <strong>exists (name)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#133">line 133</a>
+    </dt>
+    <dd>
+    Checks if a module was registered.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the module.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        Whether module <code>name</code> is registered.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "add_module_loader_uplooker"></a>
+    <strong>add_module_loader_uplooker (func)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#159">line 159</a>
+    </dt>
+    <dd>
+    Adds a function to look for module loaders. </p>
+
+<p> <code>func(module_name)</code> must either return nothing (=> no loader found) or return
+ a loader function.</p>
+
+<p> Semantics of a loader function <code>l</code>:</p>
+
+<ul>
+    <li><code>retval, errmsg = l(module_name)</code> will be used by <a href="../modules/dslib:mmodules.html#try_mrequire">try_mrequire</a> and <a href="../modules/dslib:mmodules.html#mrequire">mrequire</a>
+    to load the module.</li>
+    <li>If <code>retval</code> is <code>nil</code>, the loading fails, but <code>l</code> will be called again on
+    another <a href="../modules/dslib:mmodules.html#try_mrequire">try_mrequire</a> or <a href="../modules/dslib:mmodules.html#mrequire">mrequire</a> call.</li>
+    <li>If <code>retval</code> is <code>false</code>, the loading fails, and no more attempts for loading
+    the respective module will be made.</li>
+    <li>If <code>retval</code> is any other value, the loading succeeds and <code>retval</code> is the module's
+    retval.</li>
+    <li>Iff the loading fails, <code>errmsg</code> should be a string indicating the error.</li>
+</ul>
+
+<p> You will very likely not need this. Try <code>mmodules.add_module_by_loader</code> first.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">func</span>
+            <span class="types"><span class="type">function</span></span>
+         The uplooker function.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "add_module_by_loader"></a>
+    <strong>add_module_by_loader (name, loader)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#177">line 177</a>
+    </dt>
+    <dd>
+    Adds a module with a loader function for it. </p>
+
+<p> <code>loader(name)</code> will be called to load the module.
+ See <a href="../modules/dslib:mmodules.html#add_module_loader_uplooker">add_module_loader_uplooker</a> for details on loader functions.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the module.
+        </li>
+        <li><span class="parameter">loader</span>
+            <span class="types"><span class="type">function</span></span>
+         Will be called to load the module.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "add_module_by_value"></a>
+    <strong>add_module_by_value (name, value)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#187">line 187</a>
+    </dt>
+    <dd>
+    Adds a value as a module. </p>
+
+<p> When loading, <code>value</code> will be returned.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the module.
+        </li>
+        <li><span class="parameter">value</span>
+         The return value of the module. Must not be <code>nil</code> or <code>false</code>.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "add_module_by_string"></a>
+    <strong>add_module_by_string (name, code_str)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#200">line 200</a>
+    </dt>
+    <dd>
+    Adds a module via its source code. </p>
+
+<p> When loading, the code will be loaded and used as loader function.
+ See <a href="../modules/dslib:mmodules.html#add_module_loader_uplooker">add_module_loader_uplooker</a> for details on loader functions.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the module.
+        </li>
+        <li><span class="parameter">code_str</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The code.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "add_module_by_file"></a>
+    <strong>add_module_by_file (name, path)</strong>
+    <a style="float:right;" href="../source/mmodules.lua.html#213">line 213</a>
+    </dt>
+    <dd>
+    Adds a module via its file. </p>
+
+<p> When loading, the code in the file will be loaded and used as loader function.
+ See <a href="../modules/dslib:mmodules.html#add_module_loader_uplooker">add_module_loader_uplooker</a> for details on loader functions.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">name</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The name of the module.
+        </li>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         The path of the file.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

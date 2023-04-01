@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Source</h2>
+<ul class="nowrap">
+  <li><a href="../source/init.lua.html">init.lua</a></li>
+  <li><strong>endian_helpers.lua</strong></li>
+  <li><a href="../source/fmt.lua.html">fmt.lua</a></li>
+  <li><a href="../source/mmodules.lua.html">mmodules.lua</a></li>
+  <li><a href="../source/new_luajit_stuff.lua.html">new_luajit_stuff.lua</a></li>
+  <li><a href="../source/raw_buffer.lua.html">raw_buffer.lua</a></li>
+  <li><a href="../source/rotnum.lua.html">rotnum.lua</a></li>
+  <li><a href="../source/start_end.lua.html">start_end.lua</a></li>
+  <li><a href="../source/blups.lua.html">blups.lua</a></li>
+  <li><a href="../source/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../source/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>endian_helpers.lua</h2>
+<pre>
+<span class="comment">-- Copyright (C) 2023 DS
+</span><span class="comment">--
+</span><span class="comment">-- SPDX-License-Identifier: Apache-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Licensed under the Apache License, Version 2.0 (the "License");
+</span><span class="comment">-- you may not use this file except in compliance with the License.
+</span><span class="comment">-- You may obtain a copy of the License at
+</span><span class="comment">--
+</span><span class="comment">--     http://www.apache.org/licenses/LICENSE-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Unless required by applicable law or agreed to in writing, software
+</span><span class="comment">-- distributed under the License is distributed on an "AS IS" BASIS,
+</span><span class="comment">-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+</span><span class="comment">-- See the License for the specific language governing permissions and
+</span><span class="comment">-- limitations under the License.
+</span>
+<span class="comment">--- Helper functions for endianness.
+</span><span class="comment">-- @module dslib:endian_helpers
+</span>
+<span class="keyword">local</span> raw_buffer = dslib.mrequire(<span class="string">"dslib.raw_buffer"</span>)
+
+<span class="keyword">local</span> endian_helpers = {}
+endian_helpers.version = <span class="string">"0.1.0"</span>
+
+<span class="comment">-- find out the endian-ness via duck-typing
+</span><span class="comment">-- TODO: just use ffi.abi
+</span><span class="keyword">local</span> endian
+<span class="keyword">do</span>
+	<span class="keyword">local</span> buf = raw_buffer.new()
+	buf:append_u64(<span class="number">0x8877665544332211</span>ULL)
+
+	<span class="keyword">local</span> bytes_little = {[<span class="number">0</span>] = <span class="number">0x11</span>, <span class="number">0x22</span>, <span class="number">0x33</span>, <span class="number">0x44</span>, <span class="number">0x55</span>, <span class="number">0x66</span>, <span class="number">0x77</span>, <span class="number">0x88</span>}
+	<span class="keyword">local</span> bytes_big    = {[<span class="number">0</span>] = <span class="number">0x88</span>, <span class="number">0x77</span>, <span class="number">0x66</span>, <span class="number">0x55</span>, <span class="number">0x44</span>, <span class="number">0x33</span>, <span class="number">0x22</span>, <span class="number">0x11</span>}
+	<span class="keyword">local</span> is_little_endian = <span class="keyword">true</span>
+	<span class="keyword">local</span> is_big_endian    = <span class="keyword">true</span>
+	<span class="keyword">for</span> i = <span class="number">0</span>, <span class="number">7</span> <span class="keyword">do</span>
+		<span class="keyword">local</span> byte = buf:read_u8(i)
+		<span class="keyword">if</span> byte ~= bytes_little[i] <span class="keyword">then</span>
+			is_little_endian = <span class="keyword">false</span>
+		<span class="keyword">end</span>
+		<span class="keyword">if</span> byte ~= bytes_big[i] <span class="keyword">then</span>
+			is_big_endian = <span class="keyword">false</span>
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+
+	<span class="keyword">if</span> is_little_endian <span class="keyword">then</span>
+		endian = <span class="string">"little"</span>
+	<span class="keyword">elseif</span> is_big_endian <span class="keyword">then</span>
+		endian = <span class="string">"big"</span> <span class="comment">-- not tested
+</span>	<span class="keyword">else</span>
+		<span class="global">error</span>(<span class="string">"Your system has a weird endian-ness."</span>)
+		<span class="comment">-- from now on, assume that no other enian-nesses exist
+</span>	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Returns the native endian-ness of the system.
+</span><a id="58"></a><span class="comment">-- @return <code>&quot;little&quot;</code> for little-endian, <code>&quot;big&quot;</code> for big-endian. Anything else is not supported.
+</span><span class="keyword">function</span> endian_helpers.get_endian()
+	<span class="keyword">return</span> endian
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> identity_func(a)
+	<span class="keyword">return</span> a
+<span class="keyword">end</span>
+
+<span class="comment">--- Converts a number from one endian-ness to another.
+</span><span class="comment">--
+</span><span class="comment">-- <code>X</code> and <code>Y</code> can be any of <code>n</code>, <code>l</code> and <code>b</code>, for native-, little- and big endian-ness respectively.
+</span><span class="comment">--
+</span><span class="comment">-- The numbers can also be LuaJIT 64 bit cdata numbers.
+</span><span class="comment">--
+</span><span class="comment">-- If a number is used, it may be interpreted as signed 32-bit integer. (<code>bit.bswap</code>
+</span><span class="comment">-- is used.)
+</span><span class="comment">--
+</span><span class="comment">-- TODO: Auto-create doc for all, instead of the templates in the name.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam int num The number to convert in endian-ness <code>X</code>.
+</span><span class="comment">-- @treturn int The number in endian-ness <code>Y</code>.
+</span><span class="comment">-- @function endian_helpers.Xe_to_Ye
+</span><a id="81"></a>
+endian_helpers.ne_to_le = endian == <span class="string">"big"</span> <span class="keyword">and</span> bit.bswap <span class="keyword">or</span> identity_func
+endian_helpers.ne_to_be = endian == <span class="string">"big"</span> <span class="keyword">and</span> identity_func <span class="keyword">or</span> bit.bswap
+endian_helpers.le_to_ne = endian == <span class="string">"big"</span> <span class="keyword">and</span> bit.bswap <span class="keyword">or</span> identity_func
+endian_helpers.be_to_ne = endian == <span class="string">"big"</span> <span class="keyword">and</span> identity_func <span class="keyword">or</span> bit.bswap
+endian_helpers.le_to_be = bit.bswap
+endian_helpers.be_to_le = bit.bswap
+endian_helpers.ne_to_ne = identity_func
+endian_helpers.le_to_le = identity_func
+endian_helpers.be_to_be = identity_func
+
+<span class="comment">--- Alias for <code>ne_to_le()</code>.
+</span><span class="comment">-- @tparam int num
+</span><span class="comment">-- @treturn int
+</span><a id="95"></a><span class="comment">-- @function endian_helpers.to_le
+</span>endian_helpers.to_le = endian_helpers.ne_to_le
+<span class="comment">--- Alias for <code>ne_to_be()</code>.
+</span><span class="comment">-- @tparam int num
+</span><span class="comment">-- @treturn int
+</span><a id="100"></a><span class="comment">-- @function endian_helpers.to_be
+</span>endian_helpers.to_be = endian_helpers.ne_to_be
+<span class="comment">--- Alias for <code>le_to_ne()</code>.
+</span><span class="comment">-- @tparam int num
+</span><span class="comment">-- @treturn int
+</span><a id="105"></a><span class="comment">-- @function endian_helpers.from_le
+</span>endian_helpers.from_le = endian_helpers.le_to_ne
+<span class="comment">--- Alias for <code>be_to_ne()</code>.
+</span><span class="comment">-- @tparam int num
+</span><span class="comment">-- @treturn int
+</span><a id="110"></a><span class="comment">-- @function endian_helpers.from_be
+</span>endian_helpers.from_be = endian_helpers.be_to_ne
+
+<span class="comment">--- Alias for <code>ne_to_ne()</code> and similar (identity).
+</span><span class="comment">-- @tparam int num
+</span><span class="comment">-- @treturn int
+</span><a id="116"></a><span class="comment">-- @function endian_helpers.identity
+</span>endian_helpers.identity = identity_func
+<span class="comment">--- Alias for <code>le_to_be()</code> and <code>be_to_le()</code> (<code>bit.bswap</code>).
+</span><span class="comment">-- @tparam int num
+</span><span class="comment">-- @treturn int
+</span><a id="121"></a><span class="comment">-- @function endian_helpers.bswap
+</span>endian_helpers.bswap = bit.bswap
+
+<span class="keyword">return</span> endian_helpers</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

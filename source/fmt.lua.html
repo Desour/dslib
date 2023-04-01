@@ -1,0 +1,498 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Source</h2>
+<ul class="nowrap">
+  <li><a href="../source/init.lua.html">init.lua</a></li>
+  <li><a href="../source/endian_helpers.lua.html">endian_helpers.lua</a></li>
+  <li><strong>fmt.lua</strong></li>
+  <li><a href="../source/mmodules.lua.html">mmodules.lua</a></li>
+  <li><a href="../source/new_luajit_stuff.lua.html">new_luajit_stuff.lua</a></li>
+  <li><a href="../source/raw_buffer.lua.html">raw_buffer.lua</a></li>
+  <li><a href="../source/rotnum.lua.html">rotnum.lua</a></li>
+  <li><a href="../source/start_end.lua.html">start_end.lua</a></li>
+  <li><a href="../source/blups.lua.html">blups.lua</a></li>
+  <li><a href="../source/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../source/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>fmt.lua</h2>
+<pre>
+<span class="comment">-- Copyright (C) 2023 DS
+</span><span class="comment">--
+</span><span class="comment">-- SPDX-License-Identifier: Apache-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Licensed under the Apache License, Version 2.0 (the "License");
+</span><span class="comment">-- you may not use this file except in compliance with the License.
+</span><span class="comment">-- You may obtain a copy of the License at
+</span><span class="comment">--
+</span><span class="comment">--     http://www.apache.org/licenses/LICENSE-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Unless required by applicable law or agreed to in writing, software
+</span><span class="comment">-- distributed under the License is distributed on an "AS IS" BASIS,
+</span><span class="comment">-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+</span><span class="comment">-- See the License for the specific language governing permissions and
+</span><span class="comment">-- limitations under the License.
+</span>
+<span class="comment">---
+</span><span class="comment">-- Unfinished.
+</span><span class="comment">--
+</span><span class="comment">-- TODO: doc
+</span><span class="comment">-- TODO: caching
+</span><span class="comment">-- TODO: compiling
+</span><span class="comment">--
+</span><span class="comment">-- @module dslib:fmt
+</span>
+<span class="keyword">local</span> fmt = {}
+fmt.version = <span class="string">"0.1.0"</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> table_insert_all(t, ...)
+	<span class="keyword">local</span> s = #t
+	<span class="keyword">for</span> i = <span class="number">1</span>, <span class="global">select</span>(<span class="string">"#"</span>, ...) <span class="keyword">do</span>
+		t[s+i] = <span class="global">select</span>(i, ...)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> table_insert_all_after_apply(f, t, ...)
+	<span class="keyword">local</span> s = #t
+	<span class="keyword">for</span> i = <span class="number">1</span>, <span class="global">select</span>(<span class="string">"#"</span>, ...) <span class="keyword">do</span>
+		t[s+i] = f(<span class="global">select</span>(i, ...))
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> my_string_split(s, c)
+	<span class="keyword">local</span> parts = {}
+	<span class="keyword">local</span> current_start = <span class="number">0</span>
+	<span class="keyword">for</span> i = <span class="number">1</span>, #s <span class="keyword">do</span>
+		<span class="keyword">if</span> s:sub(i, i) == c <span class="keyword">then</span>
+			<span class="global">table</span>.insert(parts, s:sub(current_start, i-<span class="number">1</span>))
+			current_start = i+<span class="number">1</span>
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+	<span class="global">table</span>.insert(parts, s:sub(current_start, -<span class="number">1</span>))
+	<span class="keyword">return</span> parts
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> log_level_ignored = (<span class="keyword">function</span>()
+		<span class="keyword">if</span> minetest.is_fake <span class="keyword">then</span>
+			<span class="keyword">return</span> {}
+		<span class="keyword">end</span>
+		<span class="keyword">local</span> log_levels = {<span class="string">"none"</span>, <span class="string">"error"</span>, <span class="string">"warning"</span>, <span class="string">"action"</span>, <span class="string">"info"</span>, <span class="string">"verbose"</span>}
+		<span class="keyword">local</span> log_level_hierarchy = <span class="global">table</span>.key_value_swap(log_levels)
+		log_level_hierarchy[<span class="string">""</span>] = <span class="number">0</span>
+		log_level_hierarchy[<span class="string">"trace"</span>] = <span class="number">7</span>
+		<span class="keyword">local</span> log_level_min = <span class="global">math</span>.max(<span class="global">math</span>.max(
+				log_level_hierarchy[minetest.settings:get(<span class="string">"chat_log_level"</span>)],
+				log_level_hierarchy[minetest.settings:get(<span class="string">"debug_log_level"</span>)]),
+				log_level_hierarchy[minetest.settings:get(<span class="string">"dslib.fmt.nonignore_log_level"</span>) <span class="keyword">or</span> <span class="string">"action"</span>])
+		<span class="keyword">local</span> ignored = {}
+		<span class="keyword">for</span> h, level <span class="keyword">in</span> <span class="global">ipairs</span>(log_levels) <span class="keyword">do</span>
+			<span class="keyword">if</span> h &gt; log_level_min <span class="keyword">then</span>
+				ignored[level] = <span class="keyword">true</span>
+			<span class="keyword">end</span>
+		<span class="keyword">end</span>
+		<span class="keyword">return</span> ignored
+	<span class="keyword">end</span>)()
+
+<span class="keyword">local</span> <span class="keyword">function</span> parse_log_level_mappings()
+	<span class="keyword">local</span> err_prefix = <span class="string">"dslib:fmt: Failed to parse secure.dslib.fmt.log_level_mappings:"</span>
+	<span class="keyword">local</span> valid_log_levels = <span class="global">table</span>.key_value_swap({<span class="string">"none"</span>, <span class="string">"error"</span>, <span class="string">"warning"</span>, <span class="string">"action"</span>, <span class="string">"info"</span>, <span class="string">"verbose"</span>})
+	<span class="keyword">local</span> valid_mappings   = <span class="global">table</span>.key_value_swap({<span class="string">"none"</span>, <span class="string">"error"</span>, <span class="string">"warning"</span>, <span class="string">"action"</span>, <span class="string">"info"</span>, <span class="string">"verbose"</span>, <span class="string">"quiet"</span>})
+
+	<span class="keyword">local</span> setting_str = minetest.settings:get(<span class="string">"secure.dslib.fmt.log_level_mappings"</span>) <span class="keyword">or</span> <span class="string">"{}"</span>
+	<span class="keyword">local</span> define_vars_without_quotes = <span class="string">""</span>
+	<span class="keyword">for</span> _, level <span class="keyword">in</span> <span class="global">ipairs</span>({<span class="string">"none"</span>, <span class="string">"error"</span>, <span class="string">"warning"</span>, <span class="string">"action"</span>, <span class="string">"info"</span>, <span class="string">"verbose"</span>, <span class="string">"log"</span>}) <span class="keyword">do</span>
+		define_vars_without_quotes = define_vars_without_quotes
+				.. <span class="string">"local "</span>..level..<span class="string">"=\"tried_to_use_variable\";"</span>
+	<span class="keyword">end</span>
+	<span class="keyword">local</span> ret, errmsg = minetest.deserialize(<span class="string">"return "</span>..setting_str, <span class="keyword">true</span>)
+	<span class="keyword">if</span> <span class="keyword">not</span> ret <span class="keyword">then</span>
+		<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"%s	Could not deserialize: %s"</span>, err_prefix, errmsg))
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> global = ret.global <span class="keyword">or</span> {}
+	<span class="keyword">local</span> mods = ret.mods <span class="keyword">or</span> {}
+	ret.global = <span class="keyword">nil</span>
+	ret.mods = <span class="keyword">nil</span>
+	<span class="keyword">if</span> <span class="global">next</span>(ret) <span class="keyword">then</span>
+		<span class="keyword">local</span> k = <span class="global">next</span>(ret)
+		<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"%s What's this '%s'?"</span>, err_prefix, k))
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> <span class="keyword">function</span> check_entry(entry, name)
+		<span class="keyword">for</span> k, v <span class="keyword">in</span> <span class="global">pairs</span>(entry) <span class="keyword">do</span>
+			<span class="keyword">if</span> <span class="keyword">not</span> valid_log_levels[k] <span class="keyword">then</span>
+				<span class="keyword">if</span> k == <span class="string">"log"</span> <span class="keyword">then</span>
+					<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"%s 'log' is not a log level. Did you mean 'none'? (found in %s)"</span>, err_prefix, name))
+				<span class="keyword">else</span>
+					<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"%s '%s' is not a log level. (found in %s)"</span>, err_prefix, k, name))
+				<span class="keyword">end</span>
+			<span class="keyword">end</span>
+			<span class="keyword">if</span> <span class="keyword">not</span> valid_mappings[k] <span class="keyword">then</span>
+				<span class="keyword">if</span> k == <span class="string">"tried_to_use_variable"</span> <span class="keyword">then</span>
+					<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"%s You forgot the quotes. (found in %s.%s)"</span>, err_prefix, name, k))
+				<span class="keyword">elseif</span> k == <span class="string">"log"</span> <span class="keyword">then</span>
+					<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"%s 'log' is not a log level. Did you mean 'none'? (found in %s.%s)"</span>, err_prefix, name, k))
+				<span class="keyword">else</span>
+					<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"%s '%s' is not a log level. (found in %s.%s)"</span>, err_prefix, v, name, k))
+				<span class="keyword">end</span>
+			<span class="keyword">end</span>
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+
+	check_entry(global, <span class="string">"global"</span>)
+	<span class="keyword">for</span> k, v <span class="keyword">in</span> <span class="global">pairs</span>(mods) <span class="keyword">do</span>
+		check_entry(v, <span class="string">"mods."</span>..k)
+	<span class="keyword">end</span>
+
+	<span class="keyword">return</span> {global = global, mods = mods}
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> log_level_mappings
+<span class="keyword">if</span> minetest.is_fake <span class="keyword">then</span>
+	log_level_mappings = {global = {}, mods = {}}
+<span class="keyword">else</span>
+	log_level_mappings = parse_log_level_mappings()
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> get_mod_log_level_mappings(modname)
+	<span class="keyword">local</span> for_global = log_level_mappings.global
+	<span class="keyword">local</span> for_mod = log_level_mappings.mods[modname]
+	<span class="keyword">local</span> mappings = {}
+	<span class="keyword">for</span> _, level <span class="keyword">in</span> <span class="global">ipairs</span>({<span class="string">"none"</span>, <span class="string">"error"</span>, <span class="string">"warning"</span>, <span class="string">"action"</span>, <span class="string">"info"</span>, <span class="string">"verbose"</span>}) <span class="keyword">do</span>
+		mappings[level] = for_mod[level] <span class="keyword">or</span> for_global[level] <span class="keyword">or</span> level
+	<span class="keyword">end</span>
+	<span class="keyword">return</span> mappings
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> split_fmtstr(fmtstr)
+	<span class="keyword">local</span> result = {}
+	<span class="keyword">local</span> brace_depth = <span class="number">0</span>
+	<span class="keyword">local</span> current_start = <span class="number">0</span>
+	<span class="keyword">local</span> current_part_partly = <span class="string">""</span> <span class="comment">-- used for unescaping {{ and }}
+</span>	<span class="keyword">local</span> skip_one = <span class="keyword">false</span>
+	<span class="keyword">for</span> i = <span class="number">1</span>, #fmtstr <span class="keyword">do</span>
+		<span class="keyword">if</span> skip_one <span class="keyword">then</span>
+			skip_one = <span class="keyword">false</span>
+		<span class="keyword">else</span>
+			<span class="keyword">local</span> c = fmtstr:sub(i, i)
+			<span class="keyword">if</span> c == <span class="string">"{"</span> <span class="keyword">then</span>
+				<span class="keyword">if</span> fmtstr:sub(i+<span class="number">1</span>, i+<span class="number">1</span>) == <span class="string">"{"</span> <span class="keyword">then</span>
+					current_part_partly = current_part_partly..fmtstr:sub(current_start, i)
+					current_start = i+<span class="number">2</span>
+					skip_one = <span class="keyword">true</span>
+				<span class="keyword">else</span>
+					<span class="keyword">if</span> brace_depth == <span class="number">0</span>
+							<span class="keyword">and</span> (i &gt; current_start <span class="keyword">or</span> current_part_partly ~= <span class="string">""</span>) <span class="keyword">then</span> <span class="comment">-- ignore ""
+</span>						<span class="global">table</span>.insert(result, <span class="string">"raw"</span>)
+						<span class="global">table</span>.insert(result, current_part_partly..fmtstr:sub(current_start, i-<span class="number">1</span>))
+					<span class="keyword">end</span>
+					brace_depth = brace_depth + <span class="number">1</span>
+					current_start = i+<span class="number">1</span>
+				<span class="keyword">end</span>
+			<span class="keyword">elseif</span> c == <span class="string">"}"</span> <span class="keyword">then</span>
+				<span class="keyword">if</span> fmtstr:sub(i+<span class="number">1</span>, i+<span class="number">1</span>) == <span class="string">"}"</span> <span class="keyword">then</span>
+					current_part_partly = current_part_partly..fmtstr:sub(current_start, i)
+					current_start = i+<span class="number">2</span>
+					skip_one = <span class="keyword">true</span>
+				<span class="keyword">else</span>
+					brace_depth = brace_depth - <span class="number">1</span>
+					<span class="keyword">if</span> brace_depth == <span class="number">0</span> <span class="keyword">then</span>
+						<span class="global">table</span>.insert(result, <span class="string">"fmt"</span>)
+						<span class="global">table</span>.insert(result, current_part_partly..fmtstr:sub(current_start, i-<span class="number">1</span>))
+						current_start = i+<span class="number">1</span>
+					<span class="keyword">elseif</span> brace_depth &lt; <span class="number">0</span> <span class="keyword">then</span>
+						<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"Invalid fmtstr: Found unmatched } at %d in fmtstr: %s"</span>, i, fmtstr))
+					<span class="keyword">end</span>
+				<span class="keyword">end</span>
+			<span class="keyword">end</span>
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+	<span class="keyword">if</span> brace_depth &gt; <span class="number">0</span> <span class="keyword">then</span>
+		<span class="global">error</span>(<span class="global">string</span>.format(<span class="string">"Invalid fmtstr: Some { was not closed in fmtstr: %s"</span>, fmtstr))
+	<span class="keyword">end</span>
+	<span class="keyword">if</span> (#fmtstr &gt;= current_start <span class="keyword">or</span> current_part_partly ~= <span class="string">""</span>) <span class="keyword">then</span> <span class="comment">-- ignore ""
+</span>		<span class="global">table</span>.insert(result, <span class="string">"raw"</span>)
+		<span class="global">table</span>.insert(result, current_part_partly..fmtstr:sub(current_start, -<span class="number">1</span>))
+	<span class="keyword">end</span>
+	<span class="keyword">return</span> result
+<span class="keyword">end</span>
+
+<span class="comment">-- parses the {:&lt;fmt_spec&gt;} thing
+</span><span class="comment">-- result is passed to formatter
+</span><span class="keyword">function</span> fmt.parse_fmt_spec(fmt_spec)
+	<span class="keyword">return</span> fmt_spec
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.formatter(spec, arg) <span class="comment">--TODO
+</span>	<span class="keyword">local</span> arg_typ = <span class="global">type</span>(arg)
+	<span class="keyword">if</span> arg_typ == <span class="string">"string"</span> <span class="keyword">then</span>
+		<span class="global">assert</span>(spec == <span class="string">""</span>)
+		<span class="keyword">return</span> arg
+	<span class="keyword">else</span>
+		<span class="global">assert</span>(spec == <span class="string">""</span>)
+		<span class="keyword">return</span> <span class="global">tostring</span>(arg)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> make_fmt(escaper, do_nt)
+	<span class="keyword">local</span> my_table_insert_all = escaper
+			<span class="keyword">and</span> <span class="keyword">function</span>(...) <span class="keyword">return</span> table_insert_all_after_apply(escaper, ...) <span class="keyword">end</span>
+			<span class="keyword">or</span> table_insert_all
+
+	<span class="keyword">local</span> parse_arg_key = do_nt
+			<span class="keyword">and</span> <span class="keyword">function</span>(s)
+				<span class="keyword">local</span> parts = my_string_split(s, <span class="string">"."</span>)
+				<span class="keyword">for</span> i = <span class="number">1</span>, #parts <span class="keyword">do</span>
+					parts[i] = <span class="global">tonumber</span>(parts[i]) <span class="keyword">or</span> parts[i]
+				<span class="keyword">end</span>
+				<span class="keyword">return</span> #parts == <span class="number">1</span> <span class="keyword">and</span> parts[<span class="number">1</span>] <span class="keyword">or</span> parts
+			<span class="keyword">end</span>
+			<span class="keyword">or</span> <span class="keyword">function</span>(s)
+				<span class="keyword">return</span> <span class="global">tonumber</span>(s) <span class="keyword">or</span> s
+			<span class="keyword">end</span>
+
+	<span class="keyword">local</span> lookup_arg = do_nt
+			<span class="keyword">and</span> <span class="keyword">function</span>(tabl, k)
+				<span class="keyword">if</span> <span class="global">type</span>(k) ~= <span class="string">"table"</span> <span class="keyword">then</span>
+					<span class="keyword">return</span> tabl[k]
+				<span class="keyword">end</span>
+				<span class="keyword">local</span> arg = tabl[k[<span class="number">1</span>]]
+				<span class="keyword">for</span> i = <span class="number">2</span>, #k <span class="keyword">do</span>
+					arg = arg <span class="keyword">and</span> arg[k[i]]
+				<span class="keyword">end</span>
+				<span class="keyword">return</span> arg
+			<span class="keyword">end</span>
+			<span class="keyword">or</span> <span class="keyword">function</span>(tabl, k)
+				<span class="keyword">return</span> tabl[k]
+			<span class="keyword">end</span>
+
+	<span class="keyword">local</span> <span class="keyword">function</span> parse_fmtstr(fmtstr)
+		<span class="keyword">local</span> parts = split_fmtstr(fmtstr)
+		<span class="keyword">local</span> next_unnamed_arg_idx = <span class="number">1</span>
+		<span class="keyword">for</span> i = <span class="number">1</span>, #parts, <span class="number">2</span> <span class="keyword">do</span>
+			<span class="keyword">if</span> parts[i] == <span class="string">"fmt"</span> <span class="keyword">then</span>
+				<span class="keyword">local</span> f = parts[i+<span class="number">1</span>]
+				<span class="keyword">local</span> j = f:find(<span class="string">":"</span>)
+				<span class="keyword">local</span> arg_name = j <span class="keyword">and</span> f:sub(j-<span class="number">1</span>) <span class="keyword">or</span> f
+				<span class="keyword">local</span> fmt_spec = j <span class="keyword">and</span> f:sub(j+<span class="number">1</span>, -<span class="number">1</span>) <span class="keyword">or</span> <span class="string">""</span>
+				<span class="keyword">local</span> arg_key
+				<span class="keyword">if</span> arg_name == <span class="string">""</span> <span class="keyword">then</span>
+					arg_key = next_unnamed_arg_idx
+					next_unnamed_arg_idx = next_unnamed_arg_idx + <span class="number">1</span>
+				<span class="keyword">else</span>
+					arg_key = parse_arg_key(arg_name)
+				<span class="keyword">end</span>
+				fmt_spec = fmt.parse_fmt_spec(fmt_spec)
+				parts[i+<span class="number">1</span>] = {arg_key, fmt_spec}
+			<span class="keyword">end</span>
+		<span class="keyword">end</span>
+		<span class="keyword">return</span> parts
+	<span class="keyword">end</span>
+
+	<span class="keyword">return</span> <span class="keyword">function</span>(fmtstr, tabl)
+		<span class="keyword">local</span> instructions = parse_fmtstr(fmtstr)
+		<span class="keyword">local</span> result = {}
+		<span class="keyword">for</span> i = <span class="number">1</span>, #instructions, <span class="number">2</span> <span class="keyword">do</span>
+			<span class="keyword">if</span> instructions[i] == <span class="string">"raw"</span> <span class="keyword">then</span>
+				<span class="global">table</span>.insert(result, instructions[i+<span class="number">1</span>])
+			<span class="keyword">else</span> <span class="comment">-- instructions[i] == "fmt"
+</span>				<span class="keyword">local</span> f = instructions[i+<span class="number">1</span>]
+				my_table_insert_all(result,
+						fmt.formatter(f[<span class="number">2</span>], lookup_arg(tabl, f[<span class="number">1</span>])))
+			<span class="keyword">end</span>
+		<span class="keyword">end</span>
+		<span class="keyword">return</span> <span class="global">table</span>.concat(result)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Escapes characters that would be interpreted in a format string.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam string str
+</span><a id="293"></a><span class="comment">-- @treturn string The escaped string.
+</span><span class="keyword">function</span> fmt.escape_fmtstr(str)
+	<span class="keyword">return</span> str:gsub(<span class="string">"[{}]"</span>, <span class="string">"%0%0"</span>)
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.fmt(fmtstr, ...)
+	<span class="keyword">return</span> fmt.fmtt(fmtstr, {...})
+<span class="keyword">end</span>
+
+<span class="comment">-- t for table
+</span>fmt.fmtt = make_fmt(<span class="keyword">nil</span>, <span class="keyword">false</span>)
+
+<span class="comment">-- nt for nested table
+</span>fmt.fmtnt = make_fmt(<span class="keyword">nil</span>, <span class="keyword">true</span>)
+
+<span class="keyword">function</span> fmt.<span class="global">print</span>(fmtstr, ...)
+	<span class="global">print</span>(fmt.fmt(fmtstr, ...))
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.printt(fmtstr, t)
+	<span class="global">print</span>(fmt.fmtt(fmtstr, t))
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.printnt(fmtstr, nt)
+	<span class="global">print</span>(fmt.fmtnt(fmtstr, nt))
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> log_func_per_level = {}
+<span class="keyword">local</span> logt_func_per_level = {}
+<span class="keyword">local</span> lognt_func_per_level = {}
+<span class="keyword">for</span> _, level <span class="keyword">in</span> <span class="global">ipairs</span>({<span class="string">"none"</span>, <span class="string">"error"</span>, <span class="string">"warning"</span>, <span class="string">"action"</span>, <span class="string">"info"</span>, <span class="string">"verbose"</span>}) <span class="keyword">do</span>
+	<span class="keyword">if</span> log_level_ignored[level] <span class="keyword">then</span>
+		log_func_per_level[level]   = <span class="keyword">function</span>() <span class="keyword">end</span>
+		logt_func_per_level[level]  = <span class="keyword">function</span>() <span class="keyword">end</span>
+		lognt_func_per_level[level] = <span class="keyword">function</span>() <span class="keyword">end</span>
+	<span class="keyword">else</span>
+		log_func_per_level[level]   = <span class="keyword">function</span>(...)
+			minetest.log(level, fmt.fmt(...))
+		<span class="keyword">end</span>
+		logt_func_per_level[level]  = <span class="keyword">function</span>(...)
+			minetest.log(level, fmt.fmtt(...))
+		<span class="keyword">end</span>
+		lognt_func_per_level[level] = <span class="keyword">function</span>(...)
+			minetest.log(level, fmt.fmtnt(...))
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+	fmt[<span class="string">"log_"</span>  ..level] = log_func_per_level[level]
+	fmt[<span class="string">"logt_"</span> ..level] = logt_func_per_level[level]
+	fmt[<span class="string">"lognt_"</span>..level] = lognt_func_per_level[level]
+<span class="keyword">end</span>
+
+log_func_per_level.log   = log_func_per_level.none
+logt_func_per_level.log  = logt_func_per_level.none
+lognt_func_per_level.log = lognt_func_per_level.none
+fmt.log_log   = log_func_per_level.log
+fmt.logt_log  = logt_func_per_level.log
+fmt.lognt_log = lognt_func_per_level.log
+
+<span class="comment">-- note: level not optional if fmtstr is "warning" or similar
+</span><span class="keyword">function</span> fmt.log(level, ...)
+	<span class="keyword">local</span> f = log_func_per_level[level]
+	<span class="keyword">if</span> f <span class="keyword">then</span>
+		<span class="keyword">return</span> f(...)
+	<span class="keyword">else</span>
+		<span class="keyword">return</span> fmt.log_log(level, ...)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.logt(level, fmtstr, t)
+	<span class="keyword">if</span> t <span class="keyword">then</span>
+		<span class="keyword">return</span> logt_func_per_level[level](fmtstr, t)
+	<span class="keyword">else</span>
+		<span class="keyword">return</span> fmt.logt_log(level, fmtstr)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.lognt(level, fmtstr, t)
+	<span class="keyword">if</span> t <span class="keyword">then</span>
+		<span class="keyword">return</span> lognt_func_per_level[level](fmtstr, t)
+	<span class="keyword">else</span>
+		<span class="keyword">return</span> fmt.lognt_log(level, fmtstr)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.get_loggers_for_mod(modname)
+	<span class="keyword">local</span> log = {}
+
+	<span class="keyword">local</span> level_mappings = get_mod_log_level_mappings(modname)
+	<span class="keyword">for</span> _, level <span class="keyword">in</span> <span class="global">ipairs</span>({<span class="string">"none"</span>, <span class="string">"error"</span>, <span class="string">"warning"</span>, <span class="string">"action"</span>, <span class="string">"info"</span>, <span class="string">"verbose"</span>}) <span class="keyword">do</span>
+		<span class="keyword">local</span> mlevel = level_mappings[level]
+		<span class="keyword">if</span> mlevel == <span class="string">"quiet"</span> <span class="keyword">then</span>
+			log[level]       = <span class="keyword">function</span>() <span class="keyword">end</span>
+			log[level..<span class="string">"t"</span>]  = <span class="keyword">function</span>() <span class="keyword">end</span>
+			log[level..<span class="string">"nt"</span>] = <span class="keyword">function</span>() <span class="keyword">end</span>
+		<span class="keyword">else</span>
+			log[level]       = fmt[<span class="string">"log_"</span>..mlevel]
+			log[level..<span class="string">"t"</span>]  = fmt[<span class="string">"logt_"</span>..mlevel]
+			log[level..<span class="string">"nt"</span>] = fmt[<span class="string">"lognt_"</span>..mlevel]
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+
+	log.log   = log.none
+	log.logt  = log.nonet
+	log.lognt = log.nonent
+
+	<span class="keyword">return</span> log
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> fmt.fmt_formspec(fmtstr, ...)
+	<span class="keyword">return</span> fmt.fmtt_formspec(fmtstr, {...})
+<span class="keyword">end</span>
+
+fmt.fmtt_formspec = make_fmt(minetest.formspec_escape, <span class="keyword">false</span>)
+
+fmt.fmtnt_formspec = make_fmt(minetest.formspec_escape, <span class="keyword">true</span>)
+
+<span class="keyword">return</span> fmt</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

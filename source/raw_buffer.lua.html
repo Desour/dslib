@@ -1,0 +1,681 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Source</h2>
+<ul class="nowrap">
+  <li><a href="../source/init.lua.html">init.lua</a></li>
+  <li><a href="../source/endian_helpers.lua.html">endian_helpers.lua</a></li>
+  <li><a href="../source/fmt.lua.html">fmt.lua</a></li>
+  <li><a href="../source/mmodules.lua.html">mmodules.lua</a></li>
+  <li><a href="../source/new_luajit_stuff.lua.html">new_luajit_stuff.lua</a></li>
+  <li><strong>raw_buffer.lua</strong></li>
+  <li><a href="../source/rotnum.lua.html">rotnum.lua</a></li>
+  <li><a href="../source/start_end.lua.html">start_end.lua</a></li>
+  <li><a href="../source/blups.lua.html">blups.lua</a></li>
+  <li><a href="../source/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../source/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>raw_buffer.lua</h2>
+<pre>
+<span class="comment">-- Copyright (C) 2023 DS
+</span><span class="comment">--
+</span><span class="comment">-- SPDX-License-Identifier: Apache-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Licensed under the Apache License, Version 2.0 (the "License");
+</span><span class="comment">-- you may not use this file except in compliance with the License.
+</span><span class="comment">-- You may obtain a copy of the License at
+</span><span class="comment">--
+</span><span class="comment">--     http://www.apache.org/licenses/LICENSE-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Unless required by applicable law or agreed to in writing, software
+</span><span class="comment">-- distributed under the License is distributed on an "AS IS" BASIS,
+</span><span class="comment">-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+</span><span class="comment">-- See the License for the specific language governing permissions and
+</span><span class="comment">-- limitations under the License.
+</span>
+<span class="comment">--- Secure wrapper for raw cdata buffers.
+</span><span class="comment">--
+</span><span class="comment">-- Note: This is very experimental.
+</span><span class="comment">--
+</span><span class="comment">-- See <code>RawBuffer</code>.
+</span><span class="comment">--
+</span><span class="comment">-- @module dslib:raw_buffer
+</span>
+<span class="comment">-- TODO: fill, memcpy, memmove, write_and_append_buf
+</span><span class="comment">-- TODO: string buffers (read and copy from)
+</span><span class="comment">-- TODO: fixed-size buffer with faster, non-atomar functions
+</span>
+<span class="keyword">local</span> load_vars = ...
+<span class="keyword">local</span> IE = load_vars.IE
+_G.<span class="global">assert</span>(IE ~= <span class="keyword">nil</span>, <span class="string">"This module needs the insecure environment."</span>)
+
+<span class="keyword">local</span> ffi = IE.dslib_ie.internal.require_with_IE_env(<span class="string">"ffi"</span>) <span class="comment">-- TODO: use IE.dslib_ie.internal.ffi, for luajit or cffi
+</span>IE.<span class="global">assert</span>(ffi ~= <span class="keyword">nil</span>, <span class="string">"This module needs the ffi (ie. from LuaJIT)."</span>)
+
+IE.<span class="global">assert</span>(ffi.istype(<span class="string">"size_t"</span>, <span class="number">1</span>ULL), <span class="string">"Non 64-bit systems are currently not supported."</span>)
+
+ffi.cdef(<span class="string">[[
+	void *malloc(size_t size);
+	void free(void *ptr);
+	void *calloc(size_t nmemb, size_t size);
+	void *realloc(void *ptr, size_t size);
+
+	void *memmove(void *dest, const void *src, size_t n);
+
+	int abs(int j); // TODO
+
+	struct DSlibBuf {
+		uint8_t *m_buffer;
+		size_t m_capacity;
+		size_t m_size;
+	};
+]]</span>)
+
+<span class="keyword">local</span> ctype_uint8_t_ptr = ffi.typeof(<span class="string">"uint8_t *"</span>)
+<span class="keyword">local</span> ctype_uint64_t    = ffi.typeof(<span class="string">"uint64_t"</span>)
+<span class="keyword">local</span> ctype_int64_t     = ffi.typeof(<span class="string">"int64_t"</span>)
+
+<span class="keyword">local</span> int_ranges_mins = {uint8_t = <span class="number">0</span>, uint16_t = <span class="number">0</span>, uint32_t = <span class="number">0</span>, uint64_t = <span class="number">0</span>ULL,
+		int8_t = -<span class="number">0x1</span>p7, int16_t = -<span class="number">0x1</span>p15, int32_t = -<span class="number">0x1</span>p31, int64_t = -<span class="number">0x1</span>p63+<span class="number">0</span>LL}
+<span class="keyword">local</span> int_ranges_maxs = {uint8_t = <span class="number">0x1</span>p8-<span class="number">1</span>, uint16_t = <span class="number">0x1</span>p16-<span class="number">1</span>, uint32_t = <span class="number">0x1</span>p32-<span class="number">1</span>, uint64_t = <span class="number">0x1</span>p64-<span class="number">1</span>ULL,
+		int8_t = <span class="number">0x1</span>p7-<span class="number">1</span>, int16_t = <span class="number">0x1</span>p15-<span class="number">1</span>, int32_t = <span class="number">0x1</span>p31-<span class="number">1</span>, int64_t = <span class="number">0x1</span>p63-<span class="number">1</span>LL}
+
+<span class="keyword">local</span> C = ffi.C
+<span class="keyword">local</span> ffi_cast   = ffi.cast
+<span class="keyword">local</span> ffi_gc     = ffi.gc
+<span class="keyword">local</span> ffi_fill   = ffi.fill
+<span class="keyword">local</span> ffi_copy   = ffi.copy
+<span class="keyword">local</span> ffi_sizeof = ffi.sizeof
+<span class="keyword">local</span> ffi_istype = ffi.istype
+<span class="keyword">local</span> ffi_string = ffi.<span class="global">string</span>
+<span class="keyword">local</span> ffi_NULL   = <span class="keyword">nil</span>
+
+<span class="keyword">local</span> <span class="global">assert</span> = IE.<span class="global">assert</span>
+<span class="keyword">local</span> <span class="global">error</span>  = IE.<span class="global">error</span>
+<span class="keyword">local</span> <span class="global">type</span>   = IE.<span class="global">type</span>
+
+<span class="keyword">local</span> math_floor = IE.<span class="global">math</span>.floor
+<span class="keyword">local</span> math_huge  = IE.<span class="global">math</span>.huge
+
+<span class="keyword">local</span> string_format = IE.<span class="global">string</span>.format
+
+<span class="keyword">local</span> bor = IE.bit.bor
+
+<span class="comment">-- the module table
+</span><span class="keyword">local</span> raw_buffer = {}
+raw_buffer.version = <span class="string">"0.1.0"</span>
+
+<span class="keyword">local</span> RawBuffer_methods = {}
+<span class="keyword">local</span> RawBuffer_metatable = {__index = RawBuffer_methods}
+
+<span class="comment">-- holds secret objects per buffer
+</span><span class="comment">-- Note: hiding something in the buffer's metatable wouldn't work because mods
+</span><span class="comment">-- have <code>debug.g/setmetatable</code>. If you have suggestions on how to do it better
+</span><span class="comment">-- (or differently) than with a key-weak static table, please tell me.
+</span><span class="keyword">local</span> s_RawBuffer_secrets = IE.<span class="global">setmetatable</span>({}, {__mode = <span class="string">"k"</span>})
+
+<span class="comment">-- checks that arg:
+</span><span class="comment">-- * is a number or 64 bit cdata
+</span><span class="comment">-- * is not NaN
+</span><span class="comment">-- * is integral
+</span><span class="comment">-- * is in the range [min_incl, max_incl] (TODO: remove this)
+</span><span class="comment">--
+</span><span class="comment">-- Note: do not remove the type check. if arg is set to some arbitrary user-controlled
+</span><span class="comment">-- value, most operators (ie. <code>&amp;lt;</code>) are compromised
+</span><span class="keyword">local</span> <span class="keyword">function</span> check_int(arg, min_incl, max_incl, new_type)
+	<span class="keyword">local</span> is_number = <span class="global">type</span>(arg) == <span class="string">"number"</span>
+	<span class="keyword">if</span> <span class="keyword">not</span> (is_number <span class="keyword">or</span> ffi_istype(arg, ctype_uint64_t)
+			<span class="keyword">or</span> ffi_istype(arg, ctype_int64_t)) <span class="keyword">then</span>
+		<span class="global">error</span>(string_format(<span class="string">"arg is not number, but %s"</span>, <span class="global">type</span>(arg)))
+	<span class="keyword">end</span>
+	<span class="keyword">if</span> is_number <span class="keyword">then</span>
+		<span class="keyword">if</span> arg ~= arg <span class="keyword">then</span>
+			<span class="global">error</span>(<span class="string">"arg is NaN"</span>)
+		<span class="keyword">end</span>
+		<span class="keyword">if</span> arg ~= math_floor(arg) <span class="keyword">or</span> arg == math_huge <span class="keyword">or</span> arg == -math_huge <span class="keyword">then</span>
+			<span class="global">error</span>(string_format(<span class="string">"arg is not integral (%f)"</span>, arg))
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+	<span class="comment">-- cast now to avoid wrong implicit cast at comparison (ie. min_incl to u64 at
+</span>	<span class="comment">-- write_i64 with arg=1ULL)
+</span>	<span class="keyword">local</span> ret_arg = ffi_cast(new_type, arg)
+	<span class="keyword">if</span> ret_arg &lt; min_incl <span class="keyword">or</span> ret_arg &gt; max_incl <span class="keyword">then</span>
+		<span class="comment">-- (use tostring because string.format with %d doesn't add the LL and ULL,
+</span>		<span class="comment">-- but seems to cast to int64_t first, which can be confusing when trying
+</span>		<span class="comment">-- to write a uint64_t &gt;=0x1p63 as i64)
+</span>		<span class="global">error</span>(string_format(<span class="string">"arg is outside of range (%s is not in [%s, %s])"</span>,
+				IE.<span class="global">tostring</span>(arg), IE.<span class="global">tostring</span>(min_incl), IE.<span class="global">tostring</span>(max_incl)))
+	<span class="keyword">end</span>
+	<span class="keyword">return</span> ret_arg
+<span class="keyword">end</span>
+
+<span class="comment">--- Creates a new <code>RawBuffer</code>.
+</span><span class="comment">-- @treturn RawBuffer The new buffer.
+</span><span class="comment">-- @function new_RawBuffer
+</span>raw_buffer.new_RawBuffer = <span class="keyword">function</span>()
+	<span class="keyword">local</span> buf = IE.<span class="global">setmetatable</span>({}, RawBuffer_metatable)
+	s_RawBuffer_secrets[buf] = { <span class="comment">-- TODO: don't name the fields with strings
+</span>		m_struct = ffi_gc(ffi.new(<span class="string">"struct DSlibBuf"</span>, {ffi_NULL, <span class="number">0</span>ULL, <span class="number">0</span>ULL}),
+				<span class="keyword">function</span>(strct) C.free(strct.m_buffer) <span class="keyword">end</span>),
+		m_next_lock_owner = <span class="keyword">nil</span>, <span class="comment">-- see set_lock(), unset_lock() for details
+</span>		m_locked = <span class="keyword">false</span>,
+	}
+	<span class="keyword">return</span> buf
+<span class="keyword">end</span>
+
+<span class="comment">--- A byte-addressable secure wrapper for a cdata buffer.
+</span><span class="comment">--
+</span><span class="comment">-- Maximum size is currently about <code>0x1p60</code> bytes.
+</span><a id="136"></a><span class="comment">--
+</span><span class="comment">-- Integer types can be numbers or 64 bit LuaJIT cdata integers (ie. 1ULL).
+</span><span class="comment">--
+</span><span class="comment">-- Note: The API is very unstable.
+</span><span class="comment">--
+</span><span class="comment">-- @type RawBuffer
+</span>
+<span class="comment">--[[
+
+Security notes on debug hooks and pcall:
+========================================
+
+Untrusted mods have access to debug.sethook, coroutines and pcall. This means:
+
+* Buffers can still be used after calls to error and assert (removing them from
+  s_RawBuffer_secrets would not help because of hooks).
+* Any function can stopped and later continued at every function call, function
+  return or new line. The only exception to this is if the debug hook is removed
+  before (via <code>IE.debug.sethook()</code>), but that's a NYI. (One could try to check in
+  the registry whether there's a hook set from lua (see luajit src), but that's
+  even more ugly, and I'm not sure if it works with coroutines.)
+
+We must therefore ensure that: (you can actually skip this list because of the locking)
+
+* The capacity *never* decreases. Otherwise an attacker could stop execution of a
+  writing function after capacity checks, then decrease the capacity, and then
+  write outside of the buffer.
+* <code>m_capacity</code> is *always* smaller or equal to the actual buffer capacity. We
+  therefore write the capacity *after* the realloc.
+* <code>m_size</code> is updated *after* the write (or other initialization) happened.
+* Read operations must only be able to read initialized data. Checks of old <code>m_size</code>
+  values are ok here because the size of initialized data also never shrinks.
+* Allocated memory blocks must always stay valid as long as can be accessed by any
+  function. Hence, <code>C.realloc()</code> can not be used.
+
+As we do use <code>C.realloc()</code>, we instead have to make sure, that only one function
+invocation is in a critical section (a code section that accesses the C buffer)
+at all time, we call these functions then atomar.
+The <code>set_lock()</code> and <code>unset_lock()</code> functions below are used to ensure this.
+Note: The lock is not unset if an error happens. This causes lock poisoning, which
+means that buffers can't be used anymore after an error happened, this is a good
+thing.
+
+]]</span>
+
+<span class="comment">-- sets the lock on s. if not possible, raises an error and possibly poisons the
+</span><span class="comment">-- lock. (this is just for detection of atomarity violations, not for synchronization)
+</span><span class="comment">-- (a ffi call would be slower, when jited)
+</span><span class="keyword">local</span> <span class="keyword">function</span> set_lock(s)
+	<span class="comment">--~ C.abs(1)
+</span>	<span class="comment">--~ do return end
+</span>
+	<span class="keyword">local</span> me = {}
+
+	s.m_next_lock_owner = me
+
+	<span class="global">assert</span>(<span class="keyword">not</span> s.m_locked, <span class="string">"set_lock() failed: already locked"</span>)
+
+	<span class="comment">-- Anyone who wants to lock, must have conquered the assert above, and hence
+</span>	<span class="comment">-- also set themselves as owner *before* the next line happens.
+</span>
+	s.m_locked = <span class="keyword">true</span>
+
+	<span class="comment">-- Nobody can set themselves to m_next_lock_owner and enter this section now
+</span>	<span class="comment">-- anymore.
+</span>	<span class="comment">-- And anyone in this section can no longer modify m_next_lock_owner.
+</span>	<span class="comment">-- Hence, only one can pass the next assert.
+</span>
+	<span class="global">assert</span>(s.m_next_lock_owner == me, <span class="string">"set_lock() failed: someone else locked"</span>)
+
+	<span class="comment">-- Now nobody is the next owner.
+</span>	s.m_next_lock_owner = <span class="keyword">nil</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> unset_lock(s)
+	s.m_locked = <span class="keyword">false</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> wrap_secret_and_atomar(func)
+	<span class="keyword">return</span> <span class="keyword">function</span>(self, ...)
+		<span class="keyword">local</span> s = <span class="global">assert</span>(s_RawBuffer_secrets[self])
+		set_lock(s)
+		<span class="keyword">local</span> ret = func(s.m_struct, ...)
+		unset_lock(s)
+		<span class="keyword">return</span> ret
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Returns the size of a buffer.
+</span><span class="comment">-- You can not read or write outside of this size.
+</span><span class="comment">-- @treturn int The size.
+</span><span class="comment">-- @function size
+</span><span class="keyword">function</span> RawBuffer_methods:size()
+	<span class="keyword">local</span> s = <span class="global">assert</span>(s_RawBuffer_secrets[self]).m_struct
+	<span class="keyword">return</span> s.m_size
+<span class="keyword">end</span>
+
+<span class="comment">--- Returns the capacity of a buffer.
+</span><span class="comment">-- @treturn int The capacity.
+</span><span class="comment">-- @function capacity
+</span><span class="keyword">function</span> RawBuffer_methods:capacity()
+	<span class="keyword">local</span> s = <span class="global">assert</span>(s_RawBuffer_secrets[self]).m_struct
+	<span class="keyword">return</span> s.m_capacity
+<span class="keyword">end</span>
+
+<span class="comment">--- Increases the capacity of the buffer.
+</span><a id="242"></a><span class="comment">-- Size is not influenced.
+</span><span class="comment">-- Capacity is never decreased.
+</span><span class="comment">-- @tparam int new_capacity The requested minimal new capacity.
+</span><span class="comment">-- @function reserve
+</span><span class="keyword">local</span> <span class="keyword">function</span> RawBuffer_methods_reserve(s, new_capacity)
+	<span class="keyword">if</span> s.m_capacity &gt;= new_capacity <span class="keyword">then</span>
+		<span class="keyword">return</span>
+	<span class="keyword">end</span><a id="250"></a>
+
+	<span class="comment">-- be more restrictive than 0x1p64 to avoid negative numbers in int64_t, even
+</span>	<span class="comment">-- after we multiply by 4
+</span>	new_capacity = check_int(new_capacity, <span class="number">0</span>ULL, <span class="number">0x1</span>p60-<span class="number">1</span>ULL, ctype_uint64_t)
+
+	<span class="comment">-- increase capacity by factor 2 (TODO: choose better factor?)
+</span>	<span class="keyword">local</span> actual_new_capacity = s.m_capacity * <span class="number">2</span>ULL
+	<span class="comment">-- increase more if it was not enough
+</span>	<span class="keyword">if</span> new_capacity &gt; actual_new_capacity <span class="keyword">then</span>
+		<span class="comment">-- round to multiple of 0x10 (TODO: remove premature opti)
+</span>		<a id="260"></a><span class="comment">-- (new_capacity - 1 &gt;= 0 holds because of 0 &lt;= s.m_capacity &lt; new_capacity)
+</span>		actual_new_capacity = bor(new_capacity - <span class="number">1</span>, <span class="number">0xf</span>ULL) + <span class="number">1</span>
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> new_buf = C.realloc(s.m_buffer, actual_new_capacity)
+	<span class="keyword">if</span> new_buf == ffi_NULL <span class="keyword">then</span>
+		<span class="comment">-- realloc() failed. the original buffer is untouched
+</span>		<span class="global">error</span>(<span class="string">"realloc() failed"</span>)
+	<span class="keyword">end</span>
+
+	s.m_buffer = ffi_cast(ctype_uint8_t_ptr, new_buf)
+
+	s.m_capacity = actual_new_capacity
+<span class="keyword">end</span>
+
+RawBuffer_methods.reserve = wrap_secret_and_atomar(RawBuffer_methods_reserve)
+
+<span class="comment">--- In- or decreases the size of the buffer.
+</span><span class="comment">-- If size is increased, new data is filled with <code>0</code>s.
+</span><span class="comment">-- @tparam int new_size The new size.
+</span><span class="comment">-- @function resize
+</span>RawBuffer_methods.resize = wrap_secret_and_atomar(<span class="keyword">function</span>(s, new_size)
+	new_size = check_int(new_size, <span class="number">0</span>ULL, <span class="number">0x1</span>p60-<span class="number">1</span>ULL, ctype_uint64_t)
+
+	<span class="keyword">if</span> s.m_size &gt;= new_size <span class="keyword">then</span>
+		s.m_size = new_size
+		<span class="keyword">return</span>
+	<span class="keyword">end</span>
+
+	<span class="comment">-- Note: doing self:reserve(...) or RawBuffer_methods.reserve(...) would be
+</span>	<span class="comment">-- insecure
+</span>	RawBuffer_methods_reserve(s, new_size)
+
+	ffi_fill(s.m_buffer + s.m_size, new_size - s.m_size)
+	s.m_size = new_size
+<span class="keyword">end</span>)
+
+<span class="keyword">local</span> <span class="keyword">function</span> check_offset(s, offset, value_size)
+	<span class="global">assert</span>(s.m_size &gt;= value_size, <span class="string">"calculation would overflow. Are you trying to read from / write to empty buffer?"</span>)
+	<span class="keyword">return</span> check_int(offset, <span class="number">0</span>ULL, s.m_size - value_size, ctype_uint64_t)
+<span class="keyword">end</span>
+
+<span class="comment">-- read methods
+</span><span class="keyword">do</span>
+	<span class="keyword">local</span> <span class="keyword">function</span> make_read_func(type_str)
+		<span class="keyword">local</span> type_size = ffi_sizeof(type_str)
+		<span class="keyword">local</span> ctype_ptr = ffi.typeof(type_str..<span class="string">" *"</span>)
+
+		<span class="keyword">return</span> wrap_secret_and_atomar(<span class="keyword">function</span>(s, offset)
+			offset = check_offset(s, offset, type_size)
+
+			<span class="keyword">return</span> ffi_cast(ctype_ptr, s.m_buffer + offset)[<span class="number">0</span>]
+		<span class="keyword">end</span>)
+	<span class="keyword">end</span>
+
+	<span class="keyword">for</span> _, i <span class="keyword">in</span> IE.<span class="global">ipairs</span>({<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>}) <span class="keyword">do</span>
+		<span class="keyword">local</span> type_str = string_format(<span class="string">"int%d_t"</span>, i * <span class="number">8</span>)
+		RawBuffer_methods[<span class="string">"read_u"</span>..(<span class="number">8</span>*i)] = make_read_func(<span class="string">"u"</span>..type_str)
+		RawBuffer_methods[<span class="string">"read_i"</span>..(<span class="number">8</span>*i)] = make_read_func(type_str)
+	<span class="keyword">end</span>
+
+	<span class="comment">--- Reads an unsigned 8-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn int The <code>u8</code> value at the given offset.
+</span>	<span class="comment">-- @function read_u8
+</span>
+	<span class="comment">--- Reads an unsigned 16-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn int The <code>u16</code> value at the given offset.
+</span>	<span class="comment">-- @function read_u16
+</span>
+	<span class="comment">--- Reads an unsigned 32-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn int The <code>u32</code> value at the given offset.
+</span>	<span class="comment">-- @function read_u32
+</span>
+	<span class="comment">--- Reads an unsigned 64-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn int The <code>u64</code> value at the given offset. It is a <code>uint64_t</code> cdata value.
+</span>	<span class="comment">-- @function read_u64
+</span>
+	<span class="comment">--- Reads a signed 8-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn int The <code>i8</code> value at the given offset.
+</span>	<span class="comment">-- @function read_i8
+</span>
+	<span class="comment">--- Reads a signed 16-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn int The <code>i16</code> value at the given offset.
+</span>	<span class="comment">-- @function read_i16
+</span>
+	<span class="comment">--- Reads a signed 32-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn int The <code>i32</code> value at the given offset.
+</span>	<span class="comment">-- @function read_i32
+</span>
+	<span class="comment">--- Reads a signed 64-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @treturn int The <code>i64</code> value at the given offset. It is an <code>int64_t</code> cdata value.
+</span>	<span class="comment">-- @function read_i64
+</span>
+	<span class="comment">--- Reads a 32-bit floating-point number (a <code>float</code>) at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn number The <code>f32</code> value at the given offset.
+</span>	<span class="comment">-- @function read_f32
+</span>	RawBuffer_methods.read_f32 = make_read_func(<span class="string">"float"</span>)
+
+	<span class="comment">--- Reads a 64-bit floating-point number (a <code>double</code>) at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @treturn number The <code>f64</code> value at the given offset.
+</span>	<span class="comment">-- @function read_f64
+</span>	RawBuffer_methods.read_f64 = make_read_func(<span class="string">"double"</span>)
+
+	<span class="comment">--- Reads a string of a given length at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer.
+</span>	<span class="comment">-- @tparam int len Length of the string. Must not exceed buffer size.
+</span>	<span class="comment">-- @treturn string A copy of the data as string.
+</span>	<span class="comment">-- @function read_string
+</span>	RawBuffer_methods.read_string = wrap_secret_and_atomar(<span class="keyword">function</span>(s, offset, len)
+		len = check_int(len, <span class="number">0</span>ULL, int_ranges_maxs.uint64_t, ctype_uint64_t)
+		offset = check_offset(s, offset, len)
+
+		<span class="keyword">return</span> ffi_string(s.m_buffer + offset, len)
+	<span class="keyword">end</span>)
+<span class="keyword">end</span>
+
+<span class="comment">-- TODO: remove append and make write to:
+</span><span class="comment">-- * resize until offset if big
+</span><span class="comment">-- * reserve
+</span><span class="comment">-- * write and possibly increase size
+</span><span class="comment">-- or not?
+</span>
+<span class="comment">-- write methods
+</span><span class="keyword">do</span>
+	<span class="keyword">local</span> <span class="keyword">function</span> make_write_func(type_str, value_checker)
+		<span class="keyword">local</span> type_size = ffi_sizeof(type_str)
+		<span class="keyword">local</span> ctype_ptr = ffi.typeof(type_str..<span class="string">" *"</span>)
+		value_checker = value_checker <span class="keyword">or</span> <span class="keyword">function</span>(v) <span class="keyword">return</span> v <span class="keyword">end</span>
+
+		<span class="keyword">return</span> wrap_secret_and_atomar(<span class="keyword">function</span>(s, offset, value)
+			offset = check_offset(s, offset, type_size)
+			value = value_checker(value)
+
+			ffi_cast(ctype_ptr, s.m_buffer + offset)[<span class="number">0</span>] = value
+		<span class="keyword">end</span>)
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> <span class="keyword">function</span> make_int_write_func(type_str)
+		<span class="keyword">local</span> min = <span class="global">assert</span>(int_ranges_mins[type_str])
+		<span class="keyword">local</span> max = <span class="global">assert</span>(int_ranges_maxs[type_str])
+		<span class="keyword">local</span> c_type = ffi.typeof(type_str)
+		<span class="keyword">return</span> make_write_func(type_str, <span class="keyword">function</span>(value)
+			<span class="keyword">return</span> check_int(value, min, max, c_type)
+		<span class="keyword">end</span>)
+	<span class="keyword">end</span>
+
+	<span class="keyword">for</span> _, i <span class="keyword">in</span> IE.<span class="global">ipairs</span>({<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>}) <span class="keyword">do</span>
+		<span class="keyword">local</span> type_str = string_format(<span class="string">"int%d_t"</span>, i * <span class="number">8</span>)
+		RawBuffer_methods[<span class="string">"write_u"</span>..(<span class="number">8</span>*i)] = make_int_write_func(<span class="string">"u"</span>..type_str)
+		RawBuffer_methods[<span class="string">"write_i"</span>..(<span class="number">8</span>*i)] = make_int_write_func(type_str)
+	<span class="keyword">end</span>
+
+	<span class="comment">--- Writes an unsigned 8-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>u8</code> value to write.
+</span>	<span class="comment">-- @function write_u8
+</span>
+	<span class="comment">--- Writes an unsigned 16-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>u16</code> value to write.
+</span>	<span class="comment">-- @function write_u16
+</span>
+	<span class="comment">--- Writes an unsigned 32-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>u32</code> value to write.
+</span>	<span class="comment">-- @function write_u32
+</span>
+	<span class="comment">--- Writes an unsigned 64-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>u64</code> value to write. Can be a <code>uint64_t</code> cdata value.
+</span>	<span class="comment">-- @function write_u64
+</span>
+	<span class="comment">--- Writes a signed 8-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>i8</code> value to write.
+</span>	<span class="comment">-- @function write_i8
+</span>
+	<span class="comment">--- Writes a signed 16-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>i16</code> value to write.
+</span>	<span class="comment">-- @function write_i16
+</span>
+	<span class="comment">--- Writes a signed 32-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>i32</code> value to write.
+</span>	<span class="comment">-- @function write_i32
+</span>
+	<span class="comment">--- Writes a signed 64-bit integer at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam int value The <code>i64</code> value to write. Can be an <code>int64_t</code> cdata value.
+</span>	<span class="comment">-- @function write_i64
+</span>
+	<span class="comment">--- Writes a 32-bit floating-point number (a <code>float</code>) at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam number value The <code>f32</code> value to write.
+</span>	<span class="comment">-- @function write_f32
+</span>	RawBuffer_methods.write_f32 = make_write_func(<span class="string">"float"</span>)
+
+	<span class="comment">--- Writes a 64-bit floating-point number (a <code>double</code>) at a given byte-offset.
+</span>	<span class="comment">-- @tparam int offset Byte-offset in the buffer
+</span>	<span class="comment">-- @tparam number value The <code>f64</code> value to write.
+</span>	<span class="comment">-- @function write_f64
+</span>	RawBuffer_methods.write_f64 = make_write_func(<span class="string">"double"</span>)
+
+	<span class="comment">--- TODO
+</span>	<span class="comment">-- @function copy_from
+</span>	<span class="keyword">local</span> <span class="keyword">function</span> RawBuffer_methods_copy_from_inner(s_dst, dst_offset, s_src, src_offset, len)
+		len = check_int(len, <span class="number">0</span>ULL, int_ranges_maxs.uint64_t, ctype_uint64_t)
+		dst_offset = check_offset(s_dst, dst_offset, len)
+		src_offset = check_offset(s_src, src_offset, len)
+
+		<span class="keyword">if</span> s_dst == s_src
+				<span class="comment">-- if they overlap, each start must be before the other's end
+</span>				<span class="comment">-- if they don't overlap, one comes after the other
+</span>				<span class="keyword">and</span> dst_offset &lt; src_offset + len <span class="keyword">and</span> src_offset &lt; dst_offset + len <span class="keyword">then</span>
+			C.memmove(s_dst.m_buffer + dst_offset, s_src.m_buffer + src_offset, len)
+		<span class="keyword">else</span>
+			ffi_copy(s_dst.m_buffer + dst_offset, s_src.m_buffer + src_offset, len)
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+	<span class="keyword">function</span> RawBuffer_methods:copy_from(dst_offset, src_buf, src_offset, len)
+		<span class="keyword">local</span> s_dst = <span class="global">assert</span>(s_RawBuffer_secrets[self])
+		<span class="keyword">local</span> s_src = <span class="global">assert</span>(s_RawBuffer_secrets[src_buf])
+		set_lock(s_dst)
+		set_lock(s_src)
+		RawBuffer_methods_copy_from_inner(s_dst.m_struct, dst_offset,
+				s_src.m_struct, src_offset, len)
+		unset_lock(s_src)
+		unset_lock(s_dst)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- append methods
+</span><span class="keyword">do</span>
+	<span class="keyword">local</span> <span class="keyword">function</span> make_append_func(type_str, value_checker)
+		<span class="keyword">local</span> type_size = ffi_sizeof(type_str)
+		<span class="keyword">local</span> ctype_ptr = ffi.typeof(type_str..<span class="string">" *"</span>)
+		value_checker = value_checker <span class="keyword">or</span> <span class="keyword">function</span>(v) <span class="keyword">return</span> v <span class="keyword">end</span>
+
+		<span class="keyword">return</span> wrap_secret_and_atomar(<span class="keyword">function</span>(s, value)
+			value = value_checker(value)
+
+			RawBuffer_methods_reserve(s, s.m_size + type_size)
+
+			ffi_cast(ctype_ptr, s.m_buffer + s.m_size)[<span class="number">0</span>] = value
+			s.m_size = s.m_size + type_size
+		<span class="keyword">end</span>)
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> <span class="keyword">function</span> make_int_append_func(type_str)
+		<span class="keyword">local</span> min = <span class="global">assert</span>(int_ranges_mins[type_str])
+		<span class="keyword">local</span> max = <span class="global">assert</span>(int_ranges_maxs[type_str])
+		<span class="keyword">local</span> c_type = ffi.typeof(type_str)
+		<span class="keyword">return</span> make_append_func(type_str, <span class="keyword">function</span>(value)
+			<span class="keyword">return</span> check_int(value, min, max, c_type)
+		<span class="keyword">end</span>)
+	<span class="keyword">end</span>
+
+	<span class="keyword">for</span> _, i <span class="keyword">in</span> IE.<span class="global">ipairs</span>({<span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>}) <span class="keyword">do</span>
+		<span class="keyword">local</span> type_str = string_format(<span class="string">"int%d_t"</span>, i * <span class="number">8</span>)
+		RawBuffer_methods[<span class="string">"append_u"</span>..(<span class="number">8</span>*i)] = make_int_append_func(<span class="string">"u"</span>..type_str)
+		RawBuffer_methods[<span class="string">"append_i"</span>..(<span class="number">8</span>*i)] = make_int_append_func(type_str)
+	<span class="keyword">end</span>
+
+	<span class="comment">--- Appends an unsigned 8-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>u8</code> value to write.
+</span>	<span class="comment">-- @function append_u8
+</span>
+	<span class="comment">--- Appends an unsigned 16-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>u16</code> value to write.
+</span>	<span class="comment">-- @function append_u16
+</span>
+	<span class="comment">--- Appends an unsigned 32-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>u32</code> value to write.
+</span>	<span class="comment">-- @function append_u32
+</span>
+	<span class="comment">--- Appends an unsigned 64-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>u64</code> value to write. Can be a <code>uint64_t</code> cdata value.
+</span>	<span class="comment">-- @function append_u64
+</span>
+	<span class="comment">--- Appends a signed 8-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>i8</code> value to write.
+</span>	<span class="comment">-- @function append_i8
+</span>
+	<span class="comment">--- Appends a signed 16-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>i16</code> value to write.
+</span>	<span class="comment">-- @function append_i16
+</span>
+	<span class="comment">--- Appends a signed 32-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>i32</code> value to write.
+</span>	<span class="comment">-- @function append_i32
+</span>
+	<span class="comment">--- Appends a signed 64-bit integer to the end of the buffer.
+</span>	<span class="comment">-- @tparam int value The <code>i64</code> value to write. Can be an <code>int64_t</code> cdata value.
+</span>	<span class="comment">-- @function append_i64
+</span>
+	<span class="comment">--- Appends a 32-bit floating-point number (a <code>float</code>) to the end of the buffer.
+</span>	<span class="comment">-- @tparam number value The <code>f32</code> value to write.
+</span>	<span class="comment">-- @function append_f32
+</span>	RawBuffer_methods.append_f32 = make_append_func(<span class="string">"float"</span>)
+
+	<span class="comment">--- Appends a 64-bit floating-point number (a <code>double</code>) to the end of the buffer.
+</span>	<span class="comment">-- @tparam number value The <code>f64</code> value to write.
+</span>	<span class="comment">-- @function append_f64
+</span>	RawBuffer_methods.append_f64 = make_append_func(<span class="string">"double"</span>)
+<span class="keyword">end</span>
+
+<span class="keyword">return</span> raw_buffer</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

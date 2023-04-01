@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Source</h2>
+<ul class="nowrap">
+  <li><strong>init.lua</strong></li>
+  <li><a href="../source/endian_helpers.lua.html">endian_helpers.lua</a></li>
+  <li><a href="../source/fmt.lua.html">fmt.lua</a></li>
+  <li><a href="../source/mmodules.lua.html">mmodules.lua</a></li>
+  <li><a href="../source/new_luajit_stuff.lua.html">new_luajit_stuff.lua</a></li>
+  <li><a href="../source/raw_buffer.lua.html">raw_buffer.lua</a></li>
+  <li><a href="../source/rotnum.lua.html">rotnum.lua</a></li>
+  <li><a href="../source/start_end.lua.html">start_end.lua</a></li>
+  <li><a href="../source/blups.lua.html">blups.lua</a></li>
+  <li><a href="../source/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../source/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>init.lua</h2>
+<pre>
+<span class="comment">-- Copyright (C) 2023 DS
+</span><span class="comment">--
+</span><span class="comment">-- SPDX-License-Identifier: Apache-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Licensed under the Apache License, Version 2.0 (the "License");
+</span><span class="comment">-- you may not use this file except in compliance with the License.
+</span><span class="comment">-- You may obtain a copy of the License at
+</span><span class="comment">--
+</span><span class="comment">--     http://www.apache.org/licenses/LICENSE-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Unless required by applicable law or agreed to in writing, software
+</span><span class="comment">-- distributed under the License is distributed on an "AS IS" BASIS,
+</span><span class="comment">-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+</span><span class="comment">-- See the License for the specific language governing permissions and
+</span><span class="comment">-- limitations under the License.
+</span>
+<span class="comment">--- The init.
+</span><span class="comment">-- This module is already loaded as global <a href="../modules/dslib.html#">dslib</a>.
+</span><span class="comment">-- Other modules can be loaded via <a href="../modules/dslib.html#mrequire">dslib.mrequire</a>.
+</span><span class="comment">-- @module dslib
+</span>
+<span class="keyword">local</span> IE = minetest.request_insecure_environment()
+<span class="keyword">local</span> has_IE = IE ~= <span class="keyword">nil</span>
+
+dslib = {}
+<span class="keyword">local</span> dslib_version = <span class="string">"0.3.0"</span>
+dslib.version = dslib_version
+dslib.internal = {}
+
+<span class="keyword">if</span> has_IE <span class="keyword">then</span>
+	IE.dslib_ie = {} <span class="comment">-- _G == IE is possible, therefore not IE.dslib
+</span>	IE.dslib_ie.version = dslib_version
+	IE.dslib_ie.internal = {}
+<span class="keyword">end</span>
+
+<span class="comment">-- The submodules that can be <code>.mrequire()</code>d.
+</span><span class="comment">-- If the insecure env is needed, the sha256sum of the file must match. (This is
+</span><span class="comment">-- needed because minetest provides no way to securely get the correct modpath.)
+</span><span class="keyword">local</span> submodules = {
+	[<span class="string">"dslib:raw_buffer"</span>] = {
+		path = <span class="string">"src/raw_buffer.lua"</span>,
+		needs_IE = <span class="keyword">true</span>,
+		sha256sum = <span class="string">"5baf39067bb42b7ddacbb413db5ec11a785f4e990005f6a9a6336ca014127811"</span>,
+		experimental = <span class="keyword">true</span>,
+	},
+	[<span class="string">"dslib:endian_helpers"</span>] = {
+		path = <span class="string">"src/endian_helpers.lua"</span>,
+		needs_IE = <span class="keyword">false</span>,
+		experimental = <span class="keyword">true</span>,
+	},
+	[<span class="string">"dslib:new_luajit_stuff"</span>] = {
+		path = <span class="string">"src/new_luajit_stuff.lua"</span>,
+		needs_IE = <span class="keyword">true</span>,
+		sha256sum = <span class="string">"33a70464f995aa4280e942d4bd1bdf368145c9580ef973eacd46ffe43de32ac2"</span>,
+		experimental = <span class="keyword">true</span>,
+	},
+	[<span class="string">"dslib:start_end"</span>] = {
+		path = <span class="string">"src/start_end.lua"</span>,
+		needs_IE = <span class="keyword">false</span>,
+		experimental = <span class="keyword">true</span>,
+	},
+	[<span class="string">"dslib:rotnum"</span>] = {
+		path = <span class="string">"src/rotnum.lua"</span>,
+		needs_IE = <span class="keyword">false</span>,
+		experimental = <span class="keyword">true</span>,
+	},
+	[<span class="string">"dslib:fmt"</span>] = {
+		path = <span class="string">"src/fmt.lua"</span>,
+		needs_IE = <span class="keyword">false</span>,
+		experimental = <span class="keyword">true</span>,
+	},
+}
+
+<span class="comment">-- Only set to true while you are developing.
+</span><span class="keyword">local</span> skip_sha256_sums = <span class="keyword">false</span>
+
+<span class="comment">-- Same here. But unittests and co. may set this.
+</span><span class="keyword">if</span> has_IE <span class="keyword">then</span> <span class="comment">-- luacheck: ignore
+</span>	<span class="comment">--~ IE.dslib_ie.internal.load_experimental_trusted_modules = true
+</span><span class="keyword">end</span>
+
+dslib.internal.load_experimental_untrusted_modules = <span class="keyword">true</span>
+
+<span class="keyword">if</span> skip_sha256_sums <span class="keyword">then</span>
+	minetest.log(<span class="string">"warning"</span>, <span class="string">"dslib: skip_sha256_sums is set to true."</span>)
+<span class="keyword">end</span>
+<span class="keyword">if</span> has_IE <span class="keyword">and</span> IE.dslib_ie.internal.load_experimental_trusted_modules <span class="keyword">then</span>
+	minetest.log(<span class="string">"warning"</span>, <span class="string">"dslib: load_experimental_trusted_modules is set to true."</span>)
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="global">error</span>  = has_IE <span class="keyword">and</span> IE.<span class="global">error</span>  <span class="keyword">or</span> _G.<span class="global">error</span> <span class="comment">-- does not return. _G.error can return
+</span><span class="keyword">local</span> <span class="global">assert</span> = has_IE <span class="keyword">and</span> IE.<span class="global">assert</span> <span class="keyword">or</span> _G.<span class="global">assert</span>
+<span class="keyword">local</span> <span class="global">pairs</span>  = has_IE <span class="keyword">and</span> IE.<span class="global">pairs</span>  <span class="keyword">or</span> _G.<span class="global">pairs</span>
+<span class="keyword">local</span> <span class="global">type</span>   = has_IE <span class="keyword">and</span> IE.<span class="global">type</span>   <span class="keyword">or</span> _G.<span class="global">type</span>
+<span class="keyword">local</span> string_format = has_IE <span class="keyword">and</span> IE.<span class="global">string</span>.format <span class="keyword">or</span> _G.<span class="global">string</span>.format
+
+<span class="comment">-- the mmodules module
+</span><span class="keyword">local</span> dslib_modpath = minetest.get_modpath(<span class="string">"dslib"</span>)
+<span class="global">assert</span>(<span class="global">type</span>(dslib_modpath) == <span class="string">"string"</span>)
+<span class="keyword">local</span> mmodules = _G.<span class="global">dofile</span>(dslib_modpath .. <span class="string">"/src/mmodules.lua"</span>)
+mmodules.add_module_by_value(<span class="string">"dslib:mmodules"</span>, mmodules)
+
+<span class="comment">--- Loads a module. Can be used like <a href="https://www.lua.org/manual/5.1/manual.html#pdf-require">require</a>.
+</span><span class="comment">--
+</span><span class="comment">-- A module can return one value.
+</span><span class="comment">-- Module return values are cached.
+</span><span class="comment">--
+</span><span class="comment">-- For registering modules use the <a href="../modules/dslib:mmodules.html#">dslib:mmodules</a> module:
+</span><span class="comment">-- <code>local mmodules = dslib.mrequire(&quot;dslib:mmodules&quot;)</code>
+</span><span class="comment">--
+</span><span class="comment">-- @tparam string name The name of the module.
+</span><span class="comment">-- @return The return value of the module.
+</span><a id="114"></a><span class="comment">-- @function dslib.mrequire
+</span>dslib.mrequire = mmodules.mrequire
+
+<span class="keyword">while</span> has_IE <span class="keyword">do</span> <span class="comment">-- luacheck: ignore (no loop)
+</span>	<span class="comment">-- the same as <code>IE.require(...)</code>, but sets the env to IE
+</span>	<span class="keyword">function</span> IE.dslib_ie.internal.require_with_IE_env(...)
+		<span class="comment">-- be sure that there is no hook, otherwise one could get IE via getfenv
+</span>		IE.<span class="global">debug</span>.sethook()
+
+		<span class="keyword">local</span> old_thread_env = IE.<span class="global">getfenv</span>(<span class="number">0</span>)
+		<span class="keyword">local</span> old_string_metatable = IE.<span class="global">debug</span>.<span class="global">getmetatable</span>(<span class="string">""</span>)
+
+		<span class="comment">-- set env of thread
+</span>		<span class="comment">-- (the loader used by IE.require will probably use the thread env for
+</span>		<span class="comment">-- the loaded functions)
+</span>		IE.<span class="global">setfenv</span>(<span class="number">0</span>, IE)
+
+		<span class="comment">-- also set the string metatable because the lib might use it while loading
+</span>		<span class="comment">-- (actually, we probably have to do this every time we call a <code>require()</code>d
+</span>		<span class="comment">-- function, but for performance reasons we only do it if the function
+</span>		<span class="comment">-- uses the string metatable)
+</span>		<span class="comment">-- (Maybe it would make sense to set the string metatable __index field
+</span>		<span class="comment">-- to a function that grabs the string table from the thread env.)
+</span>		IE.<span class="global">debug</span>.<span class="global">setmetatable</span>(<span class="string">""</span>, {__index = IE.<span class="global">string</span>})
+
+		<span class="comment">-- (IE.require's env is neither _G, nor IE. we need to leave it like this,
+</span>		<span class="comment">-- otherwise it won't find the loaders (it uses the global <code>loaders</code>, not
+</span>		<span class="comment">-- <a href="https://www.lua.org/manual/5.1/manual.html#pdf-package.loaders">package.loaders</a> btw. (see luajit/src/lib_package.c)))
+</span>
+		<span class="comment">-- we might be pcall()ed, so we need to pcall to make sure that we reset
+</span>		<span class="comment">-- the thread env afterwards
+</span>		<span class="keyword">local</span> ok, ret = IE.<span class="global">pcall</span>(IE.<span class="global">require</span>, ...)
+
+		<span class="comment">-- reset env of thread
+</span>		IE.<span class="global">setfenv</span>(<span class="number">0</span>, old_thread_env)
+
+		<span class="comment">-- also reset the string metatable
+</span>		IE.<span class="global">debug</span>.<span class="global">setmetatable</span>(<span class="string">""</span>, old_string_metatable)
+
+		<span class="keyword">if</span> <span class="keyword">not</span> ok <span class="keyword">then</span>
+			<span class="global">error</span>(ret)
+		<span class="keyword">end</span>
+		<span class="keyword">return</span> ret
+	<span class="keyword">end</span>
+
+	<span class="comment">-- Note: we know that "ffi" is not implemented in lua, so we do not need to
+</span>	<span class="comment">-- set the environment or similar, probably.
+</span>	<span class="keyword">local</span> ffi = IE.dslib_ie.internal.require_with_IE_env(<span class="string">"ffi"</span>) <span class="comment">-- TODO: also use cffi
+</span>	<span class="keyword">if</span> <span class="keyword">not</span> ffi <span class="keyword">then</span>
+		<span class="keyword">break</span>
+	<span class="keyword">end</span>
+	IE.dslib_ie.internal.ffi = ffi
+
+	<span class="comment">-- load openssl
+</span>	<span class="comment">-- but not into global namespace to not conflict with mintest, because it
+</span>	<span class="comment">-- has some stuff of it in src/util/sha256.c and co.
+</span>	<span class="comment">-- (in a minetest mod, we could also use ffi.C (if symbols aren't stripped))
+</span>	<span class="keyword">local</span> ssl = ffi.<span class="global">load</span>(<span class="string">"ssl"</span>, <span class="keyword">false</span>)
+
+	ffi.cdef(<span class="string">[[
+	unsigned char *SHA256(const unsigned char *d, size_t n, unsigned char *md);
+	]]</span>)
+
+	<span class="keyword">local</span> SHA256_DIGEST_LENGTH = <span class="number">32</span>
+
+	<span class="comment">-- returns the sha256sum of str as hex
+</span>	<span class="keyword">function</span> IE.dslib_ie.internal.sha256sum(str)
+		IE.<span class="global">assert</span>(IE.<span class="global">type</span>(str) == <span class="string">"string"</span>)
+		<span class="comment">-- (s_sum is a static variable in C)
+</span>		<span class="keyword">local</span> s_sum = ssl.SHA256(str, #str, <span class="keyword">nil</span>)
+		<span class="keyword">local</span> sum_t = {}
+		<span class="keyword">for</span> i = <span class="number">0</span>, SHA256_DIGEST_LENGTH - <span class="number">1</span> <span class="keyword">do</span>
+			sum_t[i+<span class="number">1</span>] = IE.bit.tohex(s_sum[i], <span class="number">2</span>)
+		<span class="keyword">end</span>
+		<span class="keyword">return</span> IE.<span class="global">table</span>.concat(sum_t)
+	<span class="keyword">end</span>
+
+	<span class="keyword">break</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> <span class="keyword">function</span> my_module_loader(module_name)
+	<span class="keyword">local</span> module_info = submodules[module_name]
+	<span class="keyword">if</span> <span class="keyword">not</span> module_info <span class="keyword">then</span>
+		<span class="global">error</span>(<span class="string">"can not happen"</span>)
+	<span class="keyword">end</span>
+
+	<span class="keyword">if</span> module_info.experimental <span class="keyword">then</span>
+		<span class="keyword">if</span> <span class="keyword">not</span> module_info.needs_IE <span class="keyword">then</span>
+			<span class="keyword">if</span> <span class="keyword">not</span> dslib.internal.load_experimental_untrusted_modules <span class="keyword">then</span>
+				<span class="keyword">return</span> <span class="keyword">false</span>, <span class="string">"Tried to load (untrusted) experimental module."</span>
+			<span class="keyword">end</span>
+		<span class="keyword">else</span>
+			<span class="keyword">if</span> <span class="keyword">not</span> IE.dslib_ie.internal.load_experimental_trusted_modules <span class="keyword">then</span>
+				<span class="keyword">return</span> <span class="keyword">false</span>, <span class="string">"Tried to load (trusted) experimental module."</span>
+			<span class="keyword">end</span>
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> path = dslib_modpath .. <span class="string">"/"</span> .. module_info.path
+
+	<span class="keyword">if</span> <span class="keyword">not</span> module_info.needs_IE <span class="keyword">then</span>
+		<span class="comment">-- raising an error if loadfile fails is ok, because it is very fatal
+</span>		<span class="keyword">return</span> <span class="global">assert</span>(_G.<span class="global">loadfile</span>(path))({})
+	<span class="keyword">end</span>
+
+	<span class="comment">-- remove any debug hook
+</span>	IE.<span class="global">debug</span>.sethook()
+
+	<span class="keyword">if</span> <span class="keyword">not</span> has_IE <span class="keyword">then</span>
+		<span class="keyword">return</span> <span class="keyword">false</span>, <span class="string">"Module needs the insecure environment, but dslib hasn't."</span>
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> file = IE.<span class="global">io</span>.open(path, <span class="string">"r"</span>)
+	<span class="keyword">local</span> code = file:read(<span class="string">"*a"</span>)
+	file:close()
+	<span class="global">assert</span>(<span class="global">type</span>(code) == <span class="string">"string"</span>) <span class="comment">-- I'm not sure if file.read can be overwritten.
+</span>
+	<span class="keyword">if</span> <span class="keyword">not</span> skip_sha256_sums <span class="keyword">then</span>
+		<span class="keyword">if</span> <span class="keyword">not</span> module_info.sha256sum <span class="keyword">then</span>
+			<span class="global">error</span>(string_format(<span class="string">"sha256-sum missing for trusted module."</span>,
+				module_name))
+		<span class="keyword">end</span>
+		<span class="keyword">local</span> hash = IE.dslib_ie.internal.sha256sum(code)
+		<span class="keyword">if</span> hash ~= module_info.sha256sum <span class="keyword">then</span>
+			<span class="global">error</span>(string_format(<span class="string">"Wrong sha256-sum (%s instead of %s)."</span>,
+				hash, module_info.sha256sum))
+		<span class="keyword">end</span>
+	<span class="keyword">end</span>
+
+	<span class="comment">-- loadstring seems to cut off the chunkname at the end if it's too long,
+</span>	<span class="comment">-- which hides the exact file. to avoid this, we cut ourself at the front
+</span>	<span class="keyword">local</span> chunkname_path = path
+	<span class="keyword">if</span> #chunkname_path &gt; <span class="number">20</span> <span class="keyword">then</span>
+		chunkname_path = <span class="string">"..."</span>..IE.<span class="global">string</span>.sub(chunkname_path, -<span class="number">20</span>)
+	<span class="keyword">end</span>
+	<span class="keyword">local</span> chunkname = string_format(<span class="string">"[%s] %s"</span>, module_name, chunkname_path)
+
+	<span class="keyword">return</span> <span class="global">assert</span>(IE.<span class="global">loadstring</span>(code, chunkname))({IE = IE})
+<span class="keyword">end</span>
+
+<span class="keyword">for</span> module_name, _ <span class="keyword">in</span> <span class="global">pairs</span>(submodules) <span class="keyword">do</span>
+	mmodules.add_module_by_loader(module_name, my_module_loader)
+<span class="keyword">end</span>
+
+<span class="comment">--~ -- TODO: remove
+</span><span class="comment">--~ unpack({}, 0, 2^31-1)
+</span>
+<span class="comment">--~ minetest.after(1, function()
+</span>	<span class="comment">--~ local mt = debug.getmetatable(minetest.get_player_by_name("singleplayer"))
+</span>	<span class="comment">--~ print(dump(mt))
+</span>	<span class="comment">--~ assert(mt.__gc)
+</span><span class="comment">--~ end)
+</span>
+<span class="comment">--~ print(dump(minetest.deserialize([[return ("fa.ads"):split(".")]])))</span></pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

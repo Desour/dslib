@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Topics</h2>
+<ul class="">
+  <li><strong>README</strong></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+</ul>
+
+</div>
+
+<div id="content">
+
+
+
+<!--
+Copyright (C) 2023 DS
+
+SPDX-License-Identifier: CC0-1.0
+-->
+
+
+<h1>DSlib</h1>
+
+<p>A modding helper library for Minetest mods.</p>
+
+<p>Required Minetest version: >= 5.5.0</p>
+
+<p><strong>Warning</strong>: Adding this mod to <code>secure.trusted_mods</code> in a Minetest version prior
+to 5.5.0 is considered insecure. (I.e. because mods had access to <a href="https://www.lua.org/manual/5.1/manual.html#pdf-debug.setupvalue">debug.setupvalue</a>
+and <a href="https://www.lua.org/manual/5.1/manual.html#pdf-debug.setlocal">debug.setlocal</a>.)</p>
+
+<p>This repo is hosted on Codeberg (<a href="https://codeberg.org/Desour/dslib">https://codeberg.org/Desour/dslib</a>), and there's
+a mirror on GitHub (<a href="https://github.com/Desour/dslib">https://github.com/Desour/dslib</a>). Issues and PRs are accepted
+in both locations.</p>
+
+<p><a href="https://ci.codeberg.org/Desour/dslib"><img src="https://ci.codeberg.org/api/badges/Desour/dslib/status.svg" alt="status-badge"/></a></p>
+
+
+<h1>Info for non-modders</h1>
+
+<p>Some modules of this library mod require <a href="../modules/dslib.html#">dslib</a> to be in the <code>secure.trusted_mods</code>
+setting if they are used.</p>
+
+<p>You can see this via a mod error when starting a server. The backtrace will show
+you a mod that requires the features.</p>
+
+<p>If you don't want to or can't check yourself whether you can trust this mod, you
+can try to:</p>
+
+<ul>
+    <li>look for reviews from trustworthy competent persons somewhere else,</li>
+    <li>use depending mods as trust source (if a mod uses a feature of DSlib that requires
+    it to be trusted, and doesn't explicitly warn about insecure-ness, the mod author
+    probably trusts (some version of) DSlib) and/or</li>
+    <li>think about the trustworthiness of your other mods (if they are all not malicious
+    and do not dynamically load and execute new code, there is nothing that would
+    knowingly exploit existing vulnerabilities).</li>
+</ul>
+
+<p>But in the end, it's still your responsibility to decide.
+The methods above most likely won't work.</p>
+
+
+<h1>Features</h1>
+
+<p>The most important reason why one decides to use a library is its features, so
+here we go:</p>
+
+<ul>
+    <li><a href="../modules/dslib:mmodules.html#">dslib:mmodules</a>: An api to <code>dslib.mrequire()</code> (works almost like <code>require()</code>) and
+    register modules.</li>
+    <li><a href="../modules/dslib:rotnum.html#">dslib:rotnum</a>: Helpers to make working with 90° rotations easy, ie. for facedir.</li>
+    <li><a href="../modules/dslib:raw_buffer.html#">dslib:raw_buffer</a>: TODO, experimental</li>
+    <li><a href="../modules/dslib:endian_helpers.html#">dslib:endian_helpers</a>: Functions for converting numbers between native,
+    little and big endian-ness.</li>
+    <li><a href="../modules/dslib:new_luajit_stuff.html#">dslib:new_luajit_stuff</a>: Extensions from new LuaJIT (ie. <code>table.new()</code>).</li>
+    <li><a href="../modules/dslib:fmt.html#">dslib:fmt</a>: Text formatting. (unfinished)</li>
+    <li>TODO: module for more fine grained depends</li>
+</ul>
+
+
+<h1>Qualities</h1>
+
+<p>Before deciding to use this library, you will want to check on some exclusion
+criteria. Be assured that the following qualities are (hopefully) ensured:</p>
+
+<ul>
+    <li>Everything must be secure.
+    (That is: No mod must be able to escape the sandbox because of this mod.)
+    If you find something suspicious, please tell me. Everything non-obvious must
+    be explained via a comment.
+    Experimental modules may be insecure, but they can not be loaded.</li>
+    <li>There must be documentation for every feature that is intended for use.</li>
+    <li>One should not pay for bloat that one doesn't use. (Ie. submodules are not
+    loaded unless <code>mrequire()</code>d.)</li>
+</ul>
+
+
+<h1>Documentation</h1>
+
+<p>Documentation is done using <a href="https://stevedonovan.github.io/ldoc/">ldoc</a>.</p>
+
+<p>To generate the documentation, first install ldoc, then do:
+<code>$ make doc</code>
+Then open <code>doc/ldoc/index.html</code> with a web browser.</p>
+
+
+<h1>The files in this repo</h1>
+
+<ul>
+    <li><a href="../topics/README.md.html#">README.md</a>: I am this.</li>
+    <li><code>.luacheckrc</code>: Config for luacheck (<code>$ luacheck .</code>).</li>
+    <li><code>config.ld</code>: Config for ldoc.</li>
+    <li><a href="../source/init.lua.html#">init.lua</a>, <code>src/*</code>: The src files.</li>
+    <li><code>mod.conf</code>: Mod conf for minetest.</li>
+    <li><code>examples/*</code>: Usage examples for you.</li>
+    <li><code>doc/*</code>: Documentation stuff.</li>
+    <li><code>.gitignore</code>: Git stuff.</li>
+    <li><code>tests/*</code>: Unittests written for <a href="https://olivinelabs.com/busted/">busted</a>.</li>
+    <li><code>Makefile</code>: A makefile with some targets for ldoc, luacheck, busted and co..</li>
+    <li>TODO: add missing files</li>
+</ul>
+
+
+<h1>TODOs</h1>
+
+<ul>
+    <li>add stuff</li>
+    <li>add examples</li>
+    <li>add more unittests</li>
+    <li>find out how to fix the line offsets in ldoc source pages</li>
+</ul>
+
+
+<h1>License</h1>
+
+<p>The relevant code is licensed under Apache-2.0.</p>
+
+<p>Everything else is CC0-1.0.</p>
+
+<p>Command for adding a license header:
+<code>$ reuse annotate --template=mytemplate --copyright-style=string-c --license=&quot;Apache-2.0&quot; --copyright=&quot;YOUR NAME&quot; FILES</code></p>
+
+
+<h1>Reporting security issues</h1>
+
+<p>You can report security issues to me via pm on the minetest forums, by opening
+an issue, by commenting to a commit, via a comment on minetest forums or via dm
+when you see me anywhere.</p>
+
+<p>For issues in recent changes or experimental modules, you may prefer more public
+means of communication. Otherwise more private ways are preferred (ie. forums pm),
+but not required.</p>
+
+<p>(I will try to acknowledge your message as fast as possible so you know I've read
+it.)</p>
+
+
+<h1>Contributing</h1>
+
+<p>Despite this repo's name, contributions from other persons than me are welcome, if
+they fit in the overall theme.</p>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

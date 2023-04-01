@@ -1,0 +1,1181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+<li><a href="#Class_RawBuffer">Class RawBuffer </a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><strong>dslib:raw_buffer</strong></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>dslib:raw_buffer</code></h1>
+<p>Secure wrapper for raw cdata buffers.</p>
+<p> Note: This is very experimental.</p>
+
+<p> See <a href="../modules/dslib:raw_buffer.html#RawBuffer">RawBuffer</a>.</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#new_RawBuffer">new_RawBuffer ()</a></td>
+	<td class="summary">Creates a new <a href="../modules/dslib:raw_buffer.html#RawBuffer">RawBuffer</a>.</td>
+	</tr>
+</table>
+<h2><a href="#Class_RawBuffer">Class RawBuffer </a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:size">RawBuffer:size ()</a></td>
+	<td class="summary">Returns the size of a buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:capacity">RawBuffer:capacity ()</a></td>
+	<td class="summary">Returns the capacity of a buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:reserve">RawBuffer:reserve (new_capacity)</a></td>
+	<td class="summary">Increases the capacity of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:resize">RawBuffer:resize (new_size)</a></td>
+	<td class="summary">In- or decreases the size of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_u8">RawBuffer:read_u8 (offset)</a></td>
+	<td class="summary">Reads an unsigned 8-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_u16">RawBuffer:read_u16 (offset)</a></td>
+	<td class="summary">Reads an unsigned 16-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_u32">RawBuffer:read_u32 (offset)</a></td>
+	<td class="summary">Reads an unsigned 32-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_u64">RawBuffer:read_u64 (offset)</a></td>
+	<td class="summary">Reads an unsigned 64-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_i8">RawBuffer:read_i8 (offset)</a></td>
+	<td class="summary">Reads a signed 8-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_i16">RawBuffer:read_i16 (offset)</a></td>
+	<td class="summary">Reads a signed 16-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_i32">RawBuffer:read_i32 (offset)</a></td>
+	<td class="summary">Reads a signed 32-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_i64">RawBuffer:read_i64 (offset)</a></td>
+	<td class="summary">Reads a signed 64-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_f32">RawBuffer:read_f32 (offset)</a></td>
+	<td class="summary">Reads a 32-bit floating-point number (a <code>float</code>) at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_f64">RawBuffer:read_f64 (offset)</a></td>
+	<td class="summary">Reads a 64-bit floating-point number (a <code>double</code>) at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:read_string">RawBuffer:read_string (offset, len)</a></td>
+	<td class="summary">Reads a string of a given length at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_u8">RawBuffer:write_u8 (offset, value)</a></td>
+	<td class="summary">Writes an unsigned 8-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_u16">RawBuffer:write_u16 (offset, value)</a></td>
+	<td class="summary">Writes an unsigned 16-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_u32">RawBuffer:write_u32 (offset, value)</a></td>
+	<td class="summary">Writes an unsigned 32-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_u64">RawBuffer:write_u64 (offset, value)</a></td>
+	<td class="summary">Writes an unsigned 64-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_i8">RawBuffer:write_i8 (offset, value)</a></td>
+	<td class="summary">Writes a signed 8-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_i16">RawBuffer:write_i16 (offset, value)</a></td>
+	<td class="summary">Writes a signed 16-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_i32">RawBuffer:write_i32 (offset, value)</a></td>
+	<td class="summary">Writes a signed 32-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_i64">RawBuffer:write_i64 (offset, value)</a></td>
+	<td class="summary">Writes a signed 64-bit integer at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_f32">RawBuffer:write_f32 (offset, value)</a></td>
+	<td class="summary">Writes a 32-bit floating-point number (a <code>float</code>) at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:write_f64">RawBuffer:write_f64 (offset, value)</a></td>
+	<td class="summary">Writes a 64-bit floating-point number (a <code>double</code>) at a given byte-offset.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:copy_from">RawBuffer:copy_from ()</a></td>
+	<td class="summary">TODO</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_u8">RawBuffer:append_u8 (value)</a></td>
+	<td class="summary">Appends an unsigned 8-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_u16">RawBuffer:append_u16 (value)</a></td>
+	<td class="summary">Appends an unsigned 16-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_u32">RawBuffer:append_u32 (value)</a></td>
+	<td class="summary">Appends an unsigned 32-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_u64">RawBuffer:append_u64 (value)</a></td>
+	<td class="summary">Appends an unsigned 64-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_i8">RawBuffer:append_i8 (value)</a></td>
+	<td class="summary">Appends a signed 8-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_i16">RawBuffer:append_i16 (value)</a></td>
+	<td class="summary">Appends a signed 16-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_i32">RawBuffer:append_i32 (value)</a></td>
+	<td class="summary">Appends a signed 32-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_i64">RawBuffer:append_i64 (value)</a></td>
+	<td class="summary">Appends a signed 64-bit integer to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_f32">RawBuffer:append_f32 (value)</a></td>
+	<td class="summary">Appends a 32-bit floating-point number (a <code>float</code>) to the end of the buffer.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#RawBuffer:append_f64">RawBuffer:append_f64 (value)</a></td>
+	<td class="summary">Appends a 64-bit floating-point number (a <code>double</code>) to the end of the buffer.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "new_RawBuffer"></a>
+    <strong>new_RawBuffer ()</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#136">line 136</a>
+    </dt>
+    <dd>
+    Creates a new <a href="../modules/dslib:raw_buffer.html#RawBuffer">RawBuffer</a>.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="../modules/dslib:raw_buffer.html#RawBuffer">RawBuffer</a></span>
+        The new buffer.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+    <h2 class="section-header has-description"><a name="Class_RawBuffer"></a>Class RawBuffer </h2>
+
+          <div class="section-description">
+          A byte-addressable secure wrapper for a cdata buffer. </p>
+
+<p> Maximum size is currently about <code>0x1p60</code> bytes.</p>
+
+<p> Integer types can be numbers or 64 bit LuaJIT cdata integers (ie. 1ULL).</p>
+
+<p> Note: The API is very unstable.
+          </div>
+    <dl class="function">
+    <dt>
+    <a name = "RawBuffer:size"></a>
+    <strong>RawBuffer:size ()</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#242">line 242</a>
+    </dt>
+    <dd>
+    Returns the size of a buffer.
+ You can not read or write outside of this size.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The size.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:capacity"></a>
+    <strong>RawBuffer:capacity ()</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#250">line 250</a>
+    </dt>
+    <dd>
+    Returns the capacity of a buffer.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The capacity.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:reserve"></a>
+    <strong>RawBuffer:reserve (new_capacity)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#260">line 260</a>
+    </dt>
+    <dd>
+    Increases the capacity of the buffer.
+ Size is not influenced.
+ Capacity is never decreased.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">new_capacity</span>
+            <span class="types"><span class="type">int</span></span>
+         The requested minimal new capacity.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:resize"></a>
+    <strong>RawBuffer:resize (new_size)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#295">line 295</a>
+    </dt>
+    <dd>
+    In- or decreases the size of the buffer.
+ If size is increased, new data is filled with <code>0</code>s.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">new_size</span>
+            <span class="types"><span class="type">int</span></span>
+         The new size.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_u8"></a>
+    <strong>RawBuffer:read_u8 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#340">line 340</a>
+    </dt>
+    <dd>
+    Reads an unsigned 8-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>u8</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_u16"></a>
+    <strong>RawBuffer:read_u16 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#345">line 345</a>
+    </dt>
+    <dd>
+    Reads an unsigned 16-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>u16</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_u32"></a>
+    <strong>RawBuffer:read_u32 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#350">line 350</a>
+    </dt>
+    <dd>
+    Reads an unsigned 32-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>u32</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_u64"></a>
+    <strong>RawBuffer:read_u64 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#355">line 355</a>
+    </dt>
+    <dd>
+    Reads an unsigned 64-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>u64</code> value at the given offset. It is a <code>uint64_t</code> cdata value.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_i8"></a>
+    <strong>RawBuffer:read_i8 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#360">line 360</a>
+    </dt>
+    <dd>
+    Reads a signed 8-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>i8</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_i16"></a>
+    <strong>RawBuffer:read_i16 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#365">line 365</a>
+    </dt>
+    <dd>
+    Reads a signed 16-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>i16</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_i32"></a>
+    <strong>RawBuffer:read_i32 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#370">line 370</a>
+    </dt>
+    <dd>
+    Reads a signed 32-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>i32</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_i64"></a>
+    <strong>RawBuffer:read_i64 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#375">line 375</a>
+    </dt>
+    <dd>
+    Reads a signed 64-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The <code>i64</code> value at the given offset. It is an <code>int64_t</code> cdata value.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_f32"></a>
+    <strong>RawBuffer:read_f32 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#379">line 379</a>
+    </dt>
+    <dd>
+    Reads a 32-bit floating-point number (a <code>float</code>) at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The <code>f32</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_f64"></a>
+    <strong>RawBuffer:read_f64 (offset)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#385">line 385</a>
+    </dt>
+    <dd>
+    Reads a 64-bit floating-point number (a <code>double</code>) at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">number</span></span>
+        The <code>f64</code> value at the given offset.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:read_string"></a>
+    <strong>RawBuffer:read_string (offset, len)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#392">line 392</a>
+    </dt>
+    <dd>
+    Reads a string of a given length at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer.
+        </li>
+        <li><span class="parameter">len</span>
+            <span class="types"><span class="type">int</span></span>
+         Length of the string. Must not exceed buffer size.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+        A copy of the data as string.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_u8"></a>
+    <strong>RawBuffer:write_u8 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#441">line 441</a>
+    </dt>
+    <dd>
+    Writes an unsigned 8-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u8</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_u16"></a>
+    <strong>RawBuffer:write_u16 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#446">line 446</a>
+    </dt>
+    <dd>
+    Writes an unsigned 16-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u16</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_u32"></a>
+    <strong>RawBuffer:write_u32 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#451">line 451</a>
+    </dt>
+    <dd>
+    Writes an unsigned 32-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u32</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_u64"></a>
+    <strong>RawBuffer:write_u64 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#456">line 456</a>
+    </dt>
+    <dd>
+    Writes an unsigned 64-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u64</code> value to write. Can be a <code>uint64_t</code> cdata value.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_i8"></a>
+    <strong>RawBuffer:write_i8 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#461">line 461</a>
+    </dt>
+    <dd>
+    Writes a signed 8-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i8</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_i16"></a>
+    <strong>RawBuffer:write_i16 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#466">line 466</a>
+    </dt>
+    <dd>
+    Writes a signed 16-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i16</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_i32"></a>
+    <strong>RawBuffer:write_i32 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#471">line 471</a>
+    </dt>
+    <dd>
+    Writes a signed 32-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i32</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_i64"></a>
+    <strong>RawBuffer:write_i64 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#476">line 476</a>
+    </dt>
+    <dd>
+    Writes a signed 64-bit integer at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i64</code> value to write. Can be an <code>int64_t</code> cdata value.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_f32"></a>
+    <strong>RawBuffer:write_f32 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#480">line 480</a>
+    </dt>
+    <dd>
+    Writes a 32-bit floating-point number (a <code>float</code>) at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">number</span></span>
+         The <code>f32</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:write_f64"></a>
+    <strong>RawBuffer:write_f64 (offset, value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#486">line 486</a>
+    </dt>
+    <dd>
+    Writes a 64-bit floating-point number (a <code>double</code>) at a given byte-offset.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">offset</span>
+            <span class="types"><span class="type">int</span></span>
+         Byte-offset in the buffer
+        </li>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">number</span></span>
+         The <code>f64</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:copy_from"></a>
+    <strong>RawBuffer:copy_from ()</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#490">line 490</a>
+    </dt>
+    <dd>
+    TODO
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_u8"></a>
+    <strong>RawBuffer:append_u8 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#552">line 552</a>
+    </dt>
+    <dd>
+    Appends an unsigned 8-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u8</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_u16"></a>
+    <strong>RawBuffer:append_u16 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#556">line 556</a>
+    </dt>
+    <dd>
+    Appends an unsigned 16-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u16</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_u32"></a>
+    <strong>RawBuffer:append_u32 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#560">line 560</a>
+    </dt>
+    <dd>
+    Appends an unsigned 32-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u32</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_u64"></a>
+    <strong>RawBuffer:append_u64 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#564">line 564</a>
+    </dt>
+    <dd>
+    Appends an unsigned 64-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>u64</code> value to write. Can be a <code>uint64_t</code> cdata value.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_i8"></a>
+    <strong>RawBuffer:append_i8 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#568">line 568</a>
+    </dt>
+    <dd>
+    Appends a signed 8-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i8</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_i16"></a>
+    <strong>RawBuffer:append_i16 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#572">line 572</a>
+    </dt>
+    <dd>
+    Appends a signed 16-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i16</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_i32"></a>
+    <strong>RawBuffer:append_i32 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#576">line 576</a>
+    </dt>
+    <dd>
+    Appends a signed 32-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i32</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_i64"></a>
+    <strong>RawBuffer:append_i64 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#580">line 580</a>
+    </dt>
+    <dd>
+    Appends a signed 64-bit integer to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">int</span></span>
+         The <code>i64</code> value to write. Can be an <code>int64_t</code> cdata value.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_f32"></a>
+    <strong>RawBuffer:append_f32 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#583">line 583</a>
+    </dt>
+    <dd>
+    Appends a 32-bit floating-point number (a <code>float</code>) to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">number</span></span>
+         The <code>f32</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "RawBuffer:append_f64"></a>
+    <strong>RawBuffer:append_f64 (value)</strong>
+    <a style="float:right;" href="../source/raw_buffer.lua.html#588">line 588</a>
+    </dt>
+    <dd>
+    Appends a 64-bit floating-point number (a <code>double</code>) to the end of the buffer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">value</span>
+            <span class="types"><span class="type">number</span></span>
+         The <code>f64</code> value to write.
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

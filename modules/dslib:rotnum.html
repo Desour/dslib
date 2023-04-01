@@ -1,0 +1,1340 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><strong>dslib:rotnum</strong></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>dslib:rotnum</code></h1>
+<p>Numbers for 90 degree rotations.</p>
+<p>
+
+
+<p> This module provides so-called rotnums: numbers that can represent rotations
+ of multiples of 90°, mirrorings and compositions of those.</p>
+
+<p> Rotnums can be used to rotate arbitrary spatial vectors. They can be
+ converted to and from facedir and wallmounted values and euler angles.</p>
+
+<p> <strong>Note:</strong> Rotnums are numbers, not tables, so you can't do method calls and
+ similar on them.</p>
+
+<p> For every rotation or other transformation, there is one unique rotnum. So,
+ one can compare rotnums using <code>==</code> and use rotnums as table keys.</p>
+
+
+<h2> How they work</h2>
+
+<p> Rotnums are actually a compact representation for a special kind of 3x3 matrices,
+ which have in each row only one element that is non-zero, and this element is
+ either <code>1</code> or <code>-1</code>, for example:</p>
+
+<pre>
+( <span class="number">0</span> -<span class="number">1</span>  <span class="number">0</span> )
+( <span class="number">0</span>  <span class="number">1</span>  <span class="number">0</span> ) is equivalent to <span class="number">0x415</span>
+(-<span class="number">1</span>  <span class="number">0</span>  <span class="number">0</span> )
+</pre>
+
+<p> <a href="../modules/dslib:rotnum.html#comp">comp</a> and <a href="../modules/dslib:rotnum.html#apply">apply</a> are just matrix multiplication.</p>
+
+<p> See also [Bit representation] for details.</p>
+
+<h2> Bit representation</h2>
+
+<p> A rotnum is a 11-bit integral number that the following bits (in MSBF (most
+ significant bit first) notation):</p>
+
+<pre>
+sz z1 z0 <span class="number">0</span> sy y1 y0 <span class="number">0</span> sx x1 x0
+</pre>
+
+<p> A vector <code>v_in</code> is transformed to a vector <code>v_out</code> using these bits in the
+ following way:</p>
+
+<ul>
+    <li>The <code>0</code>-bits are padding.</li>
+    <li>Let <code>w</code> be any of <code>x, y, z</code>.</li>
+    <li><code>w1 w0</code> says for <code>v_out.w</code> which component of <code>v_in</code> it should be:
+    <code>0b00</code> for <code>x</code>, <code>0b01</code> for <code>y</code> and <code>0b10</code> for <code>z</code>.</li>
+    <li>If <code>sw == 1</code>, the <code>w</code> component in <code>v_out</code> is negated.</li>
+    <li>Example: For <code>0 sx x1 x0 == 0b0110</code>, <code>v_out.x = -v_in.z</code>.</li>
+</ul>
+
+<p> You may assume that the representation of rotnums stays the same (until a major
+ version change, see Versioning.md). Hence, storing rotnums in meta and similar is
+ valid.</p>
+
+
+<h2> Caching</h2>
+
+<p> Some functions, such as <code>rotnum.rjw()</code>, are documented to return a constant.</p>
+
+<p> You can cache the return values instead of the functions:</p>
+
+<pre>
+<span class="keyword">local</span> r2x = rotnum.r2x <span class="comment">-- what you would normally do
+</span><span class="keyword">local</span> r2x = rotnum.r2x() <span class="comment">-- valid</span>
+</pre>
+
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#comp">comp (a, b)</a></td>
+	<td class="summary">Composition of two rotnums.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#apply">apply (n, vec)</a></td>
+	<td class="summary">Apply a rotnum to a vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#inv">inv (rn)</a></td>
+	<td class="summary">The inverse.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#can_inv">can_inv (rn)</a></td>
+	<td class="summary">Checks whether a rotnum is invertible.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#is_rotnum">is_rotnum (obj)</a></td>
+	<td class="summary">Checks whether something is a valid rotnum.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#compj">compj (rn1, ...)</a></td>
+	<td class="summary">Composition of <code>j</code> rotnums.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#compn">compn (rns)</a></td>
+	<td class="summary">Composition of many rotnums.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#compjapply">compjapply (rn1, ..., vec)</a></td>
+	<td class="summary">Composition of <code>j</code> rotnums and application on a vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#compnapply">compnapply (rns, vec)</a></td>
+	<td class="summary">Composition of many rotnums and application on a vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#id">id ()</a></td>
+	<td class="summary">Identity.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rjw">rjw ()</a></td>
+	<td class="summary">Rotates <code>j*90</code> degrees around the +w axis.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rljw">rljw ()</a></td>
+	<td class="summary">Alias for <code>rotnum.rjw()</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rrjw">rrjw ()</a></td>
+	<td class="summary">Alias for <code>rotnum.r(4-j)w()</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rnw">rnw (n)</a></td>
+	<td class="summary">Rotates a multiple of <code>90</code> degrees around the +w axis.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rlnw">rlnw (n)</a></td>
+	<td class="summary">Alias for <code>rotnum.rnw(n)</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rrnw">rrnw (n)</a></td>
+	<td class="summary">Alias for <code>rotnum.rnw(-n)</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rn_around">rn_around (n, dir)</a></td>
+	<td class="summary">Rotate a multiple of <code>90</code> degrees around the given axis.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rln_around">rln_around (n, dir)</a></td>
+	<td class="summary">Alias for <code>rotnum.rn_around(n, dir)</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#rrn_around">rrn_around (n, dir)</a></td>
+	<td class="summary">Alias for <code>rotnum.rn_around(-n, dir)</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mirror_w">mirror_w ()</a></td>
+	<td class="summary">Mirrors along the w axis.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#mirror_along">mirror_along (dir)</a></td>
+	<td class="summary">Mirror along given axis.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#from_facedir">from_facedir (facedir)</a></td>
+	<td class="summary">Converts a facedir number to a rotnum.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#to_facedir">to_facedir (rn)</a></td>
+	<td class="summary">Tries to convert a rotnum to a facedir number.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#wallmounted_to_facedir">wallmounted_to_facedir (wallmounted)</a></td>
+	<td class="summary">Converts a wallmounted number to a facedir number.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#facedir_to_wallmounted">facedir_to_wallmounted (facedir)</a></td>
+	<td class="summary">Tries to convert a facedir number to a wallmounted number.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#from_wallmounted">from_wallmounted (wallmounted)</a></td>
+	<td class="summary">Converts a wallmounted number to a rotnum.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#to_wallmounted">to_wallmounted (rn)</a></td>
+	<td class="summary">Tries to convert a rotnum to a wallmounted number.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#apply_facedir">apply_facedir (facedir, vec)</a></td>
+	<td class="summary">Apply a facedir number to a vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#apply_wallmounted">apply_wallmounted (wallmounted, vec)</a></td>
+	<td class="summary">Apply a wallmounted number to a vector.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#from_euler">from_euler (euler_vec)</a></td>
+	<td class="summary">(Rounds and) converts an euler angle vector to a rotnum.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#to_euler">to_euler (rn)</a></td>
+	<td class="summary">Tries to convert a rotnum to euler angles.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "comp"></a>
+    <strong>comp (a, b)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#105">line 105</a>
+    </dt>
+    <dd>
+
+<p>Composition of two rotnums. </p>
+
+<p> Applying the returned rotnum is the same as first applying <code>b</code> and then <code>a</code>.</p>
+
+<p> This operation is:</p>
+
+<ul>
+    <li>associative: <code>rotnum.comp(a, rotnum.comp(b, c)) == rotnum.comp(rotnum.comp(a, b), c)</code></li>
+    <li><strong>not</strong> commutative: <code>rotnum.comp(a, b) ~= rotnum.comp(b, a)</code></li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">a</span>
+            <span class="types"><span class="type">rotnum</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">b</span>
+            <span class="types"><span class="type">rotnum</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        The composition (<code>a</code> after <code>b</code>).
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "apply"></a>
+    <strong>apply (n, vec)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#128">line 128</a>
+    </dt>
+    <dd>
+
+<p>Apply a rotnum to a vector. </p>
+
+<p> This operation is:</p>
+
+<ul>
+    <li>associative with <code>rotnum.comp</code>: <code>rotnum.apply(a, rotnum.apply(b, v)) == rotnum.apply(rotnum.comp(a, b), v)</code></li>
+    <li>distributive with vector addition: <code>rotnum.apply(a, v1 + v2) == rotnum.apply(a, v1) + rotnum.apply(a, v2)</code></li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">rotnum</span></span>
+         The rotnum to apply.
+        </li>
+        <li><span class="parameter">vec</span>
+            <span class="types"><span class="type">vector</span></span>
+         The vector to transform.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">vector</span></span>
+        The transformed vector.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "inv"></a>
+    <strong>inv (rn)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#163">line 163</a>
+    </dt>
+    <dd>
+
+<p>The inverse. </p>
+
+<p> Applying the result undoes the given rotnum's transformation.</p>
+
+<p> <strong>Warning:</strong> Not all rotnums have an inverse (see <a href="../modules/dslib:rotnum.html#can_inv">can_inv</a> for details).
+ If the given rotnum has no inverse, the output is some integral number with
+ undefined properties.</p>
+
+<p> Example:</p>
+<pre><code>assert(rotnum.id() == rotnum.comp(rn, rotnum.inv(rn)))
+assert(rotnum.inv(rotnum.comp(rn1, rn2)) == rotnum.comp(rotnum.inv(rn2), rotnum.inv(rn1)))
+</code></pre>
+
+<p> This operation just transposes the rotnum (because invertible rotnums are
+ orthonormal).</p>
+
+<p> This function can also be used to find out where each of the <code>+x</code>, <code>+y</code> and
+ <code>+z</code> would be transformed to by the given rotnum:</p>
+
+<ul>
+    <li>In the input rotnum, <code>sw w1 w0</code> says from what the <code>w</code>-component will be created.</li>
+    <li>In the output rotnum, <code>sw w1 w0</code> says to what the <code>w</code>-component will be transformed.</li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rn</span>
+            <span class="types"><span class="type">rotnum</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "can_inv"></a>
+    <strong>can_inv (rn)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#187">line 187</a>
+    </dt>
+    <dd>
+
+<p>Checks whether a rotnum is invertible. </p>
+
+<p> The following statements are equivalent:</p>
+
+<ul>
+    <li><code>rn</code> is invertible.</li>
+    <li><code>rn</code> is a rotation, a mirroring or a composition of those.</li>
+    <li>The matrix represented by <code>rn</code> has <code>1</code> or <code>-1</code> in each column.</li>
+    <li>The matrix represented by <code>rn</code> is orthonormal.</li>
+    <li>The inverse of <code>rn</code> is its transposed.</li>
+    <li>The transposed of the matrix represented by <code>rn</code> can be represented by a rotnum.</li>
+    <li>The matrix represented by <code>rn</code> has full rank.</li>
+    <li>The determinant of the matrix represented by <code>rn</code> is either <code>1</code> or <code>-1</code>.</li>
+</ul>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rn</span>
+            <span class="types"><span class="type">rotnum</span></span>
+         The rotnum to check.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        <code>true</code> if <code>rn</code> is invertible, <code>false</code> otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "is_rotnum"></a>
+    <strong>is_rotnum (obj)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#199">line 199</a>
+    </dt>
+    <dd>
+    Checks whether something is a valid rotnum.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">obj</span>
+         Some value.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">bool</span></span>
+        <code>true</code> if <code>obj</code> is a rotnum, <code>false</code> otherwise.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "compj"></a>
+    <strong>compj (rn1, ...)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#230">line 230</a>
+    </dt>
+    <dd>
+
+<p>Composition of <code>j</code> rotnums. </p>
+
+<p> Read this as a template. The <code>compj()</code> function doesn't exist itself.
+ <code>j</code> can be any of <code>2, 3, 4, 5</code>.</p>
+
+<p> These functions can be used as shortcut for multiple calls of <a href="../modules/dslib:rotnum.html#comp">comp</a>,
+ ie.:</p>
+<pre><code>-- both do the same:
+rotnum.comp(rotnum.comp(rn1, rn2), rn3)
+rotnum.comp3(rn1, rn2, rn3)
+</code></pre>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rn1</span>
+            <span class="types"><span class="type">rotnum</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">...</span>
+            <span class="types"><span class="type">rotnum</span></span>
+         More rotnums. Number depends on <code>j</code>.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        The compositon of all rotnums.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "compn"></a>
+    <strong>compn (rns)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#251">line 251</a>
+    </dt>
+    <dd>
+
+<p>Composition of many rotnums. </p>
+
+<p> Example:</p>
+<pre><code>rotnum.compn{rn1, rn2, ...}
+</code></pre>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rns</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         List of rotnums (can be empty).
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        The compositon of all rotnums.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "compjapply"></a>
+    <strong>compjapply (rn1, ..., vec)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#276">line 276</a>
+    </dt>
+    <dd>
+
+<p>Composition of <code>j</code> rotnums and application on a vector. </p>
+
+<p> Read this as a template. The <code>compjapply()</code> function doesn't exist itself.
+ <code>j</code> can be any of <code>2, 3, 4, 5</code>.</p>
+
+<p> These functions can be used as shortcut for multiple calls of <a href="../modules/dslib:rotnum.html#comp">comp</a>,
+ followed by a call to <a href="../modules/dslib:rotnum.html#apply">apply</a>, ie.:</p>
+<pre><code>-- both do the same:
+rotnum.apply(rotnum.comp(rn1, rn2), vec)
+rotnum.comp2apply(rn1, rn2, vec)
+</code></pre>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rn1</span>
+            <span class="types"><span class="type">rotnum</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">...</span>
+            <span class="types"><span class="type">rotnum</span></span>
+         More rotnums. Number depends on <code>j</code>.
+        </li>
+        <li><span class="parameter">vec</span>
+            <span class="types"><span class="type">vector</span></span>
+         The vector to transform.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">vector</span></span>
+        The transformed vector.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "compnapply"></a>
+    <strong>compnapply (rns, vec)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#302">line 302</a>
+    </dt>
+    <dd>
+
+<p>Composition of many rotnums and application on a vector. </p>
+
+<p> Example:</p>
+<pre><code>rotnum.compnapply({rn1, rn2, ...}, vector.new(1, 0, 0))
+</code></pre>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rns</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.5">table</a></span>
+         List of rotnums (can be empty).
+        </li>
+        <li><span class="parameter">vec</span>
+            <span class="types"><span class="type">vector</span></span>
+         The vector to transform.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">vector</span></span>
+        The transformed vector.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "id"></a>
+    <strong>id ()</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#312">line 312</a>
+    </dt>
+    <dd>
+    Identity. </p>
+
+<p> A vector stays unmodified if you apply the returned rotnum to it.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        A constant.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rjw"></a>
+    <strong>rjw ()</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#330">line 330</a>
+    </dt>
+    <dd>
+    Rotates <code>j*90</code> degrees around the +w axis. </p>
+
+<p> Read this as a template. The <code>rjw()</code> function doesn't exist itself.
+ <code>j</code> can be any of <code>1, 2, 3</code>. <code>w</code> can be any of <code>x, y, z</code>.
+ Example: <code>rotnum.r1x()</code></p>
+
+<p> This is a left-handed rotation in left-handed coord system (equals right-handed
+ rotation in right-handed system).
+ Hence, it's a <strong>left-handed rotation</strong> in Minetest's left-handed system.
+ (Left-handed rotation is clockwise if you look from the <code>+w</code> side.)
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        A constant.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rljw"></a>
+    <strong>rljw ()</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#383">line 383</a>
+    </dt>
+    <dd>
+    Alias for <code>rotnum.rjw()</code>. </p>
+
+<p> The <code>l</code> stands for left-handed rotation in a left-handed coordinate system.</p>
+
+<p> Example: <code>rotnum.rl1x == rotnum.r1x</code>
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rrjw"></a>
+    <strong>rrjw ()</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#391">line 391</a>
+    </dt>
+    <dd>
+    Alias for <code>rotnum.r(4-j)w()</code>. </p>
+
+<p> The second <code>r</code> stands for right-handed rotation in a left-handed coordinate system.</p>
+
+<p> Example: <code>rotnum.rr1x == rotnum.r3x</code>
+
+
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rnw"></a>
+    <strong>rnw (n)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#424">line 424</a>
+    </dt>
+    <dd>
+    Rotates a multiple of <code>90</code> degrees around the +w axis. </p>
+
+<p> Read this as a template. The <code>rnw()</code> function doesn't exist itself.
+ <code>w</code> can be any of <code>x, y, z</code>.
+ Example: <code>rotnum.rnx()</code></p>
+
+<p> <code>n</code> will be taken modulo <code>4</code> and rounded to the nearest integer.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         How often to rotate.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        One of <code>rotnum.rjw()</code>'s return values, depending on <code>n</code>.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rlnw"></a>
+    <strong>rlnw (n)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#448">line 448</a>
+    </dt>
+    <dd>
+    Alias for <code>rotnum.rnw(n)</code>. </p>
+
+<p> Example: <code>rotnum.rlnx == rotnum.rnx</code>
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rrnw"></a>
+    <strong>rrnw (n)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#460">line 460</a>
+    </dt>
+    <dd>
+    Alias for <code>rotnum.rnw(-n)</code>. </p>
+
+<p> Example: <code>rotnum.rrnx</code>
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rn_around"></a>
+    <strong>rn_around (n, dir)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#481">line 481</a>
+    </dt>
+    <dd>
+    Rotate a multiple of <code>90</code> degrees around the given axis. </p>
+
+<p> The semantics for <code>n</code> are the same as in <code>rotnum.rnw</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+         How often to rotate.
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         <code>&quot;x&quot;</code>, <code>&quot;y&quot;</code> or <code>&quot;z&quot;</code>.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        An output of <code>rotnums.rjw</code>, depending on <code>n</code> and <code>dir</code>.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rln_around"></a>
+    <strong>rln_around (n, dir)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#490">line 490</a>
+    </dt>
+    <dd>
+    Alias for <code>rotnum.rn_around(n, dir)</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "rrn_around"></a>
+    <strong>rrn_around (n, dir)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#496">line 496</a>
+    </dt>
+    <dd>
+    Alias for <code>rotnum.rn_around(-n, dir)</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">n</span>
+            <span class="types"><span class="type">number</span></span>
+
+
+
+        </li>
+        <li><span class="parameter">dir</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mirror_w"></a>
+    <strong>mirror_w ()</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#509">line 509</a>
+    </dt>
+    <dd>
+    Mirrors along the w axis. </p>
+
+<p> Read this as a template. The <code>mirror_w()</code> function doesn't exist itself.
+ <code>w</code> can be any of <code>x, y, z</code>.
+ Example: <code>rotnum.mirror_x()</code>
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        A constant.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "mirror_along"></a>
+    <strong>mirror_along (dir)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#526">line 526</a>
+    </dt>
+    <dd>
+    Mirror along given axis.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">dir</span>
+            <span class="types"><a class="type" href="https://www.lua.org/manual/5.1/manual.html#5.4">string</a></span>
+         <code>&quot;x&quot;</code>, <code>&quot;y&quot;</code> or <code>&quot;z&quot;</code>.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        One of <code>rotnum.mirror_w()</code>'s return values, depending on <code>dir</code>.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "from_facedir"></a>
+    <strong>from_facedir (facedir)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#562">line 562</a>
+    </dt>
+    <dd>
+    Converts a facedir number to a rotnum.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">facedir</span>
+            <span class="types"><span class="type">int</span></span>
+         The facedir number.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        The rotnum.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "to_facedir"></a>
+    <strong>to_facedir (rn)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#573">line 573</a>
+    </dt>
+    <dd>
+    Tries to convert a rotnum to a facedir number. </p>
+
+<p> Facedir values can represent any compositions of 90° rotations, but not
+ mirrorings for example. Hence, this can fail.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rn</span>
+            <span class="types"><span class="type">rotnum</span></span>
+         The rotnum.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        Facedir number or <code>false</code> on failure.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "wallmounted_to_facedir"></a>
+    <strong>wallmounted_to_facedir (wallmounted)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#603">line 603</a>
+    </dt>
+    <dd>
+    Converts a wallmounted number to a facedir number.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">wallmounted</span>
+            <span class="types"><span class="type">int</span></span>
+         The wallmounted value.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The facedir value.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "facedir_to_wallmounted"></a>
+    <strong>facedir_to_wallmounted (facedir)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#610">line 610</a>
+    </dt>
+    <dd>
+    Tries to convert a facedir number to a wallmounted number.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">facedir</span>
+            <span class="types"><span class="type">int</span></span>
+         The facedir value.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The wallmounted value or <code>false</code> on failure.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "from_wallmounted"></a>
+    <strong>from_wallmounted (wallmounted)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#624">line 624</a>
+    </dt>
+    <dd>
+    Converts a wallmounted number to a rotnum.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">wallmounted</span>
+            <span class="types"><span class="type">int</span></span>
+         The wallmounted number.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+        The rotnum.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "to_wallmounted"></a>
+    <strong>to_wallmounted (rn)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#631">line 631</a>
+    </dt>
+    <dd>
+    Tries to convert a rotnum to a wallmounted number.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rn</span>
+            <span class="types"><span class="type">rotnum</span></span>
+         The rotnum.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        Wallmounted number or <code>false</code> on failure.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "apply_facedir"></a>
+    <strong>apply_facedir (facedir, vec)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#644">line 644</a>
+    </dt>
+    <dd>
+
+<p>Apply a facedir number to a vector. </p>
+
+<p> Shortcut for:</p>
+<pre><code>rotnum.apply(rotnum.from_facedir(facedir), vec)
+</code></pre>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">facedir</span>
+            <span class="types"><span class="type">int</span></span>
+         The facedir number.
+        </li>
+        <li><span class="parameter">vec</span>
+            <span class="types"><span class="type">vector</span></span>
+         The vector to transform.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">vector</span></span>
+        The transformed vector.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "apply_wallmounted"></a>
+    <strong>apply_wallmounted (wallmounted, vec)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#656">line 656</a>
+    </dt>
+    <dd>
+
+<p>Apply a wallmounted number to a vector. </p>
+
+<p> Shortcut for:</p>
+<pre><code>rotnum.apply(rotnum.from_wallmounted(wallmounted), vec)
+</code></pre>
+
+
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">wallmounted</span>
+            <span class="types"><span class="type">int</span></span>
+         The wallmounted number.
+        </li>
+        <li><span class="parameter">vec</span>
+            <span class="types"><span class="type">vector</span></span>
+         The vector to transform.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">vector</span></span>
+        The transformed vector.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "from_euler"></a>
+    <strong>from_euler (euler_vec)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#663">line 663</a>
+    </dt>
+    <dd>
+    (Rounds and) converts an euler angle vector to a rotnum.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">euler_vec</span>
+            <span class="types"><span class="type">vector</span></span>
+         The euler vectors.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">rotnum</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "to_euler"></a>
+    <strong>to_euler (rn)</strong>
+    <a style="float:right;" href="../source/rotnum.lua.html#728">line 728</a>
+    </dt>
+    <dd>
+    Tries to convert a rotnum to euler angles. </p>
+
+<p> Note: Euler angles can just rotate, hence this call can fail.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">rn</span>
+            <span class="types"><span class="type">rotnum</span></span>
+         The rotnum to convert.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        The vector of euler angles or <code>false</code> on failure.
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

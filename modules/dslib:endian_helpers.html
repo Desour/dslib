@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><strong>dslib:endian_helpers</strong></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>dslib:endian_helpers</code></h1>
+<p>Helper functions for endianness.</p>
+<p>
+
+</p>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#get_endian">get_endian ()</a></td>
+	<td class="summary">Returns the native endian-ness of the system.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#Xe_to_Ye">Xe_to_Ye (num)</a></td>
+	<td class="summary">Converts a number from one endian-ness to another.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#to_le">to_le (num)</a></td>
+	<td class="summary">Alias for <code>ne_to_le()</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#to_be">to_be (num)</a></td>
+	<td class="summary">Alias for <code>ne_to_be()</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#from_le">from_le (num)</a></td>
+	<td class="summary">Alias for <code>le_to_ne()</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#from_be">from_be (num)</a></td>
+	<td class="summary">Alias for <code>be_to_ne()</code>.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#identity">identity (num)</a></td>
+	<td class="summary">Alias for <code>ne_to_ne()</code> and similar (identity).</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#bswap">bswap (num)</a></td>
+	<td class="summary">Alias for <code>le_to_be()</code> and <code>be_to_le()</code> (<code>bit.bswap</code>).</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "get_endian"></a>
+    <strong>get_endian ()</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#58">line 58</a>
+    </dt>
+    <dd>
+    Returns the native endian-ness of the system.
+
+
+
+    <h3>Returns:</h3>
+    <ol>
+
+        <code>&quot;little&quot;</code> for little-endian, <code>&quot;big&quot;</code> for big-endian. Anything else is not supported.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "Xe_to_Ye"></a>
+    <strong>Xe_to_Ye (num)</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#81">line 81</a>
+    </dt>
+    <dd>
+    Converts a number from one endian-ness to another. </p>
+
+<p> <code>X</code> and <code>Y</code> can be any of <code>n</code>, <code>l</code> and <code>b</code>, for native-, little- and big endian-ness respectively.</p>
+
+<p> The numbers can also be LuaJIT 64 bit cdata numbers.</p>
+
+<p> If a number is used, it may be interpreted as signed 32-bit integer. (<code>bit.bswap</code>
+ is used.)</p>
+
+<p> TODO: Auto-create doc for all, instead of the templates in the name.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">int</span></span>
+         The number to convert in endian-ness <code>X</code>.
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+        The number in endian-ness <code>Y</code>.
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "to_le"></a>
+    <strong>to_le (num)</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#95">line 95</a>
+    </dt>
+    <dd>
+    Alias for <code>ne_to_le()</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">int</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "to_be"></a>
+    <strong>to_be (num)</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#100">line 100</a>
+    </dt>
+    <dd>
+    Alias for <code>ne_to_be()</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">int</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "from_le"></a>
+    <strong>from_le (num)</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#105">line 105</a>
+    </dt>
+    <dd>
+    Alias for <code>le_to_ne()</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">int</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "from_be"></a>
+    <strong>from_be (num)</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#110">line 110</a>
+    </dt>
+    <dd>
+    Alias for <code>be_to_ne()</code>.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">int</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "identity"></a>
+    <strong>identity (num)</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#116">line 116</a>
+    </dt>
+    <dd>
+    Alias for <code>ne_to_ne()</code> and similar (identity).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">int</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "bswap"></a>
+    <strong>bswap (num)</strong>
+    <a style="float:right;" href="../source/endian_helpers.lua.html#121">line 121</a>
+    </dt>
+    <dd>
+    Alias for <code>le_to_be()</code> and <code>be_to_le()</code> (<code>bit.bswap</code>).
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">num</span>
+            <span class="types"><span class="type">int</span></span>
+
+
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+           <span class="types"><span class="type">int</span></span>
+
+
+
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>

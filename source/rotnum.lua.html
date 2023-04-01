@@ -1,0 +1,823 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>DSlib Reference</title>
+    <link rel="stylesheet" href="../ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>DSlib</h1>
+
+<ul>
+  <li><a href="../index.html">Index</a></li>
+</ul>
+
+
+
+<h2>Source</h2>
+<ul class="nowrap">
+  <li><a href="../source/init.lua.html">init.lua</a></li>
+  <li><a href="../source/endian_helpers.lua.html">endian_helpers.lua</a></li>
+  <li><a href="../source/fmt.lua.html">fmt.lua</a></li>
+  <li><a href="../source/mmodules.lua.html">mmodules.lua</a></li>
+  <li><a href="../source/new_luajit_stuff.lua.html">new_luajit_stuff.lua</a></li>
+  <li><a href="../source/raw_buffer.lua.html">raw_buffer.lua</a></li>
+  <li><strong>rotnum.lua</strong></li>
+  <li><a href="../source/start_end.lua.html">start_end.lua</a></li>
+  <li><a href="../source/blups.lua.html">blups.lua</a></li>
+  <li><a href="../source/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../source/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+<h2>Modules</h2>
+<ul class="nowrap">
+  <li><a href="../modules/dslib.html">dslib</a></li>
+  <li><a href="../modules/dslib:endian_helpers.html">dslib:endian_helpers</a></li>
+  <li><a href="../modules/dslib:fmt.html">dslib:fmt</a></li>
+  <li><a href="../modules/dslib:mmodules.html">dslib:mmodules</a></li>
+  <li><a href="../modules/dslib:new_luajit_stuff.html">dslib:new_luajit_stuff</a></li>
+  <li><a href="../modules/dslib:raw_buffer.html">dslib:raw_buffer</a></li>
+  <li><a href="../modules/dslib:rotnum.html">dslib:rotnum</a></li>
+  <li><a href="../modules/dslib:start_end.html">dslib:start_end</a></li>
+</ul>
+<h2>Topics</h2>
+<ul class="">
+  <li><a href="../topics/README.md.html">README</a></li>
+  <li><a href="../topics/Getting_Started.md.html">Getting_Started</a></li>
+  <li><a href="../topics/Versioning.md.html">Versioning</a></li>
+  <li><a href="../topics/Changelog.md.html">Changelog</a></li>
+</ul>
+<h2>Examples</h2>
+<ul class="nowrap">
+  <li><a href="../examples/blups.lua.html">blups.lua</a></li>
+  <li><a href="../examples/example_mmodules.lua.html">example_mmodules.lua</a></li>
+  <li><a href="../examples/perf_test.lua.html">perf_test.lua</a></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+    <h2>rotnum.lua</h2>
+<pre>
+<span class="comment">-- Copyright (C) 2023 DS
+</span><span class="comment">--
+</span><span class="comment">-- SPDX-License-Identifier: Apache-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Licensed under the Apache License, Version 2.0 (the "License");
+</span><span class="comment">-- you may not use this file except in compliance with the License.
+</span><span class="comment">-- You may obtain a copy of the License at
+</span><span class="comment">--
+</span><span class="comment">--     http://www.apache.org/licenses/LICENSE-2.0
+</span><span class="comment">--
+</span><span class="comment">-- Unless required by applicable law or agreed to in writing, software
+</span><span class="comment">-- distributed under the License is distributed on an "AS IS" BASIS,
+</span><span class="comment">-- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+</span><span class="comment">-- See the License for the specific language governing permissions and
+</span><span class="comment">-- limitations under the License.
+</span>
+<span class="comment">--- Numbers for 90 degree rotations.
+</span><span class="comment">--
+</span><span class="comment">-- This module provides so-called rotnums: numbers that can represent rotations
+</span><span class="comment">-- of multiples of 90°, mirrorings and compositions of those.
+</span><span class="comment">--
+</span><span class="comment">-- Rotnums can be used to rotate arbitrary spatial vectors. They can be
+</span><span class="comment">-- converted to and from facedir and wallmounted values and euler angles.
+</span><span class="comment">--
+</span><span class="comment">-- **Note:** Rotnums are numbers, not tables, so you can't do method calls and
+</span><span class="comment">-- similar on them.
+</span><span class="comment">--
+</span><span class="comment">-- For every rotation or other transformation, there is one unique rotnum. So,
+</span><span class="comment">-- one can compare rotnums using <code>==</code> and use rotnums as table keys.
+</span><span class="comment">--
+</span><span class="comment">--
+</span><span class="comment">-- How they work
+</span><span class="comment">-- -------------
+</span><span class="comment">--
+</span><span class="comment">-- Rotnums are actually a compact representation for a special kind of 3x3 matrices,
+</span><span class="comment">-- which have in each row only one element that is non-zero, and this element is
+</span><span class="comment">-- either <code>1</code> or <code>-1</code>, for example:
+</span><span class="comment">--    ( 0 -1  0 )
+</span><span class="comment">--    ( 0  1  0 ) is equivalent to 0x415
+</span><span class="comment">--    (-1  0  0 )
+</span><span class="comment">--
+</span><span class="comment">-- <code>comp</code> and <code>apply</code> are just matrix multiplication.
+</span><span class="comment">--
+</span><span class="comment">-- See also [Bit representation] for details.
+</span><span class="comment">--
+</span><span class="comment">-- Bit representation
+</span><span class="comment">-- ------------------
+</span><span class="comment">--
+</span><span class="comment">-- A rotnum is a 11-bit integral number that the following bits (in MSBF (most
+</span><span class="comment">-- significant bit first) notation):
+</span><span class="comment">--    sz z1 z0 0 sy y1 y0 0 sx x1 x0
+</span><span class="comment">--
+</span><span class="comment">-- A vector <code>v_in</code> is transformed to a vector <code>v_out</code> using these bits in the
+</span><span class="comment">-- following way:
+</span><span class="comment">--
+</span><span class="comment">-- * The <code>0</code>-bits are padding.
+</span><span class="comment">-- * Let <code>w</code> be any of <code>x, y, z</code>.
+</span><span class="comment">-- * <code>w1 w0</code> says for <code>v_out.w</code> which component of <code>v_in</code> it should be:
+</span><span class="comment">--   <code>0b00</code> for <code>x</code>, <code>0b01</code> for <code>y</code> and <code>0b10</code> for <code>z</code>.
+</span><span class="comment">-- * If <code>sw == 1</code>, the <code>w</code> component in <code>v_out</code> is negated.
+</span><span class="comment">-- * Example: For <code>0 sx x1 x0 == 0b0110</code>, <code>v_out.x = -v_in.z</code>.
+</span><span class="comment">--
+</span><span class="comment">-- You may assume that the representation of rotnums stays the same (until a major
+</span><span class="comment">-- version change, see Versioning.md). Hence, storing rotnums in meta and similar is
+</span><span class="comment">-- valid.
+</span><span class="comment">--
+</span><span class="comment">--
+</span><span class="comment">-- Caching
+</span><span class="comment">-- -------
+</span><span class="comment">--
+</span><span class="comment">-- Some functions, such as <code>rotnum.rjw()</code>, are documented to return a constant.
+</span><span class="comment">--
+</span><span class="comment">-- You can cache the return values instead of the functions:
+</span><span class="comment">--    local r2x = rotnum.r2x -- what you would normally do
+</span><span class="comment">--    local r2x = rotnum.r2x() -- valid
+</span><span class="comment">--
+</span><span class="comment">--
+</span><span class="comment">-- @module dslib:rotnum
+</span>
+<span class="keyword">local</span> rotnum = {}
+rotnum.version = <span class="string">"0.1.0"</span>
+
+<span class="keyword">local</span> band     = bit.band
+<span class="keyword">local</span> bxor     = bit.bxor
+<span class="keyword">local</span> blshift  = bit.lshift
+<span class="keyword">local</span> brshift  = bit.rshift
+<span class="keyword">local</span> math_floor = <span class="global">math</span>.floor
+<span class="keyword">local</span> two_pi_th  = <span class="number">2.0</span>/<span class="global">math</span>.pi
+<span class="keyword">local</span> vector_new = vector.new
+
+<span class="keyword">local</span> xyz = {<span class="string">"x"</span>, <span class="string">"y"</span>, <span class="string">"z"</span>}
+
+<span class="comment">--- Composition of two rotnums.
+</span><span class="comment">--
+</span><span class="comment">-- Applying the returned rotnum is the same as first applying <code>b</code> and then <code>a</code>.
+</span><span class="comment">--
+</span><span class="comment">-- This operation is:
+</span><span class="comment">--
+</span><span class="comment">-- * associative: <code>rotnum.comp(a, rotnum.comp(b, c)) == rotnum.comp(rotnum.comp(a, b), c)</code>
+</span><span class="comment">-- * **not** commutative: <code>rotnum.comp(a, b) ~= rotnum.comp(b, a)</code>
+</span><span class="comment">--
+</span><span class="comment">-- @tparam rotnum a
+</span><span class="comment">-- @tparam rotnum b
+</span><a id="105"></a><span class="comment">-- @treturn rotnum The composition (<code>a</code> after <code>b</code>).
+</span><span class="keyword">function</span> rotnum.comp(a, b)
+	<span class="comment">-- use <code>x1 x0 * 4 = x1 x0 &amp;lt;&amp;lt; 2</code> from <code>a</code> as index into <code>b</code>
+</span>	<span class="keyword">local</span> x = band(brshift(b, band(blshift(a, <span class="number">2</span>), <span class="number">0xc</span>)), <span class="number">0x7</span>)
+	<span class="keyword">local</span> y = band(brshift(b, band(brshift(a, <span class="number">2</span>), <span class="number">0xc</span>)), <span class="number">0x7</span>)
+	<span class="keyword">local</span> z = band(brshift(b, band(brshift(a, <span class="number">6</span>), <span class="number">0xc</span>)), <span class="number">0x7</span>)
+	<span class="comment">-- xor the signs
+</span>	x = bxor(x, band(        a,     <span class="number">0x4</span>))
+	y = bxor(y, band(brshift(a, <span class="number">4</span>), <span class="number">0x4</span>))
+	z = bxor(z, band(brshift(a, <span class="number">8</span>), <span class="number">0x4</span>))
+	<span class="comment">-- shift to the right places
+</span>	<span class="keyword">return</span> blshift(z, <span class="number">8</span>) + blshift(y, <span class="number">4</span>) + x
+<span class="keyword">end</span>
+
+<span class="comment">--- Apply a rotnum to a vector.
+</span><span class="comment">--
+</span><span class="comment">-- This operation is:
+</span><span class="comment">--
+</span><span class="comment">-- * associative with <code>rotnum.comp</code>: <code>rotnum.apply(a, rotnum.apply(b, v)) == rotnum.apply(rotnum.comp(a, b), v)</code>
+</span><span class="comment">-- * distributive with vector addition: <code>rotnum.apply(a, v1 + v2) == rotnum.apply(a, v1) + rotnum.apply(a, v2)</code>
+</span><span class="comment">--
+</span><span class="comment">-- @tparam rotnum n The rotnum to apply.
+</span><span class="comment">-- @tparam vector vec The vector to transform.
+</span><a id="128"></a><span class="comment">-- @treturn vector The transformed vector.
+</span><span class="keyword">function</span> rotnum.apply(n, vec)
+	<span class="comment">-- The sign bit calculation does a bit magic:
+</span>	<span class="comment">-- <code>band(brshift(n, 1), 0x2)</code> is 2 if sx==1, else 0.
+</span>	<span class="comment">-- <code>1 - 2</code> is -1, <code>1 - 0</code> is 1
+</span>	<span class="comment">-- =&gt; We get -1 if sx==1, else 1.
+</span>	<span class="keyword">return</span> vector_new(
+		vec[xyz[band(        n    , <span class="number">0x3</span>) + <span class="number">1</span>]] * (<span class="number">1</span> - band(brshift(n, <span class="number">1</span>), <span class="number">0x2</span>)),
+		vec[xyz[band(brshift(n, <span class="number">4</span>), <span class="number">0x3</span>) + <span class="number">1</span>]] * (<span class="number">1</span> - band(brshift(n, <span class="number">5</span>), <span class="number">0x2</span>)),
+		vec[xyz[band(brshift(n, <span class="number">8</span>), <span class="number">0x3</span>) + <span class="number">1</span>]] * (<span class="number">1</span> - band(brshift(n, <span class="number">9</span>), <span class="number">0x2</span>))
+	)
+<span class="keyword">end</span>
+
+<span class="comment">--- The inverse.
+</span><span class="comment">--
+</span><span class="comment">-- Applying the result undoes the given rotnum's transformation.
+</span><span class="comment">--
+</span><span class="comment">-- **Warning:** Not all rotnums have an inverse (see <code>can_inv</code> for details).
+</span><span class="comment">-- If the given rotnum has no inverse, the output is some integral number with
+</span><span class="comment">-- undefined properties.
+</span><span class="comment">--
+</span><span class="comment">-- Example:
+</span><span class="comment">--    assert(rotnum.id() == rotnum.comp(rn, rotnum.inv(rn)))
+</span><span class="comment">--    assert(rotnum.inv(rotnum.comp(rn1, rn2)) == rotnum.comp(rotnum.inv(rn2), rotnum.inv(rn1)))
+</span><span class="comment">--
+</span><span class="comment">-- This operation just transposes the rotnum (because invertible rotnums are
+</span><span class="comment">-- orthonormal).
+</span><span class="comment">--
+</span><span class="comment">-- This function can also be used to find out where each of the <code>+x</code>, <code>+y</code> and
+</span><span class="comment">-- <code>+z</code> would be transformed to by the given rotnum:
+</span><span class="comment">--
+</span><span class="comment">-- * In the input rotnum, <code>sw w1 w0</code> says from what the <code>w</code>-component will be created.
+</span><span class="comment">-- * In the output rotnum, <code>sw w1 w0</code> says to what the <code>w</code>-component will be transformed.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam rotnum rn
+</span><a id="163"></a><span class="comment">-- @treturn rotnum
+</span><span class="keyword">function</span> rotnum.inv(rn)
+	<span class="comment">-- We just have to transpose:
+</span>	<span class="comment">-- Take x, y and z as 0x0, 0x1 and 0x2, add their sign change, and then blshift
+</span>	<span class="comment">-- it to its place (given by bits at 0x333 (0xc because shift *4)).
+</span>	<span class="keyword">return</span> blshift(band(        rn    , <span class="number">0x4</span>)      , band(blshift(rn, <span class="number">2</span>), <span class="number">0xc</span>))
+	     + blshift(band(brshift(rn, <span class="number">4</span>), <span class="number">0x4</span>) + <span class="number">0x1</span>, band(brshift(rn, <span class="number">2</span>), <span class="number">0xc</span>))
+	     + blshift(band(brshift(rn, <span class="number">8</span>), <span class="number">0x4</span>) + <span class="number">0x2</span>, band(brshift(rn, <span class="number">6</span>), <span class="number">0xc</span>))
+<span class="keyword">end</span>
+
+<span class="comment">--- Checks whether a rotnum is invertible.
+</span><span class="comment">--
+</span><span class="comment">-- The following statements are equivalent:
+</span><span class="comment">--
+</span><span class="comment">-- * <code>rn</code> is invertible.
+</span><span class="comment">-- * <code>rn</code> is a rotation, a mirroring or a composition of those.
+</span><span class="comment">-- * The matrix represented by <code>rn</code> has <code>1</code> or <code>-1</code> in each column.
+</span><span class="comment">-- * The matrix represented by <code>rn</code> is orthonormal.
+</span><span class="comment">-- * The inverse of <code>rn</code> is its transposed.
+</span><span class="comment">-- * The transposed of the matrix represented by <code>rn</code> can be represented by a rotnum.
+</span><span class="comment">-- * The matrix represented by <code>rn</code> has full rank.
+</span><span class="comment">-- * The determinant of the matrix represented by <code>rn</code> is either <code>1</code> or <code>-1</code>.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam rotnum rn The rotnum to check.
+</span><a id="187"></a><span class="comment">-- @treturn bool <code>true</code> if <code>rn</code> is invertible, <code>false</code> otherwise.
+</span><span class="keyword">function</span> rotnum.can_inv(rn)
+	<span class="comment">-- lshift 0x1 into the lowest 3 bits, depending on <code>w1 w0</code> values
+</span>	<span class="comment">-- iff they don't overlap, the popcnt will be 3: 0b111 (=0x7)
+</span>	<span class="keyword">return</span> (blshift(<span class="number">0x1</span>, band(        rn,     <span class="number">0x3</span>))
+	      + blshift(<span class="number">0x1</span>, band(brshift(rn, <span class="number">4</span>), <span class="number">0x3</span>))
+	      + blshift(<span class="number">0x1</span>, band(brshift(rn, <span class="number">8</span>), <span class="number">0x3</span>))) == <span class="number">0x7</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Checks whether something is a valid rotnum.
+</span><span class="comment">--
+</span><span class="comment">-- @param obj Some value.
+</span><a id="199"></a><span class="comment">-- @treturn bool <code>true</code> if <code>obj</code> is a rotnum, <code>false</code> otherwise.
+</span><span class="keyword">function</span> rotnum.is_rotnum(obj)
+	<span class="keyword">return</span> <span class="global">type</span>(obj) == <span class="string">"number"</span>
+		<span class="keyword">and</span> obj == math_floor(obj)
+		<span class="keyword">and</span> obj &gt;= <span class="number">0</span>
+		<span class="keyword">and</span> obj &lt;= <span class="number">0x666</span>
+		<span class="keyword">and</span> band(obj, <span class="number">0x088</span>) == <span class="number">0x000</span> <span class="comment">-- padding is 0
+</span>		<span class="keyword">and</span> band(obj, <span class="number">0x300</span>) ~= <span class="number">0x300</span> <span class="comment">-- <code>w1 w0</code> is not 3
+</span>		<span class="keyword">and</span> band(obj, <span class="number">0x030</span>) ~= <span class="number">0x300</span>
+		<span class="keyword">and</span> band(obj, <span class="number">0x003</span>) ~= <span class="number">0x003</span>
+<span class="keyword">end</span>
+
+<span class="keyword">do</span>
+	<span class="keyword">local</span> comp = rotnum.comp
+	<span class="keyword">local</span> apply = rotnum.apply
+
+	<span class="comment">--- Composition of <code>j</code> rotnums.
+</span>	<span class="comment">--
+</span>	<span class="comment">-- Read this as a template. The <code>compj()</code> function doesn't exist itself.
+</span>	<span class="comment">-- <code>j</code> can be any of <code>2, 3, 4, 5</code>.
+</span>	<span class="comment">--
+</span>	<span class="comment">-- These functions can be used as shortcut for multiple calls of <code>comp</code>,
+</span>	<span class="comment">-- ie.:
+</span>	<span class="comment">--    -- both do the same:
+</span>	<span class="comment">--    rotnum.comp(rotnum.comp(rn1, rn2), rn3)
+</span>	<span class="comment">--    rotnum.comp3(rn1, rn2, rn3)
+</span>	<span class="comment">--
+</span>	<span class="comment">-- @tparam rotnum rn1
+</span>	<span class="comment">-- @tparam rotnum ... More rotnums. Number depends on <code>j</code>.
+</span>	<span class="comment">-- @treturn rotnum The compositon of all rotnums.
+</span>	<span class="comment">-- @function rotnum.compj
+</span><a id="230"></a>
+	rotnum.comp2 = comp
+
+	<span class="keyword">function</span> rotnum.comp3(rn1, rn2, rn3)
+		<span class="keyword">return</span> comp(comp(rn1, rn2), rn3)
+	<span class="keyword">end</span>
+
+	<span class="keyword">function</span> rotnum.comp4(rn1, rn2, rn3, rn4)
+		<span class="keyword">return</span> comp(comp(comp(rn1, rn2), rn3), rn4)
+	<span class="keyword">end</span>
+
+	<span class="keyword">function</span> rotnum.comp5(rn1, rn2, rn3, rn4, rn5)
+		<span class="keyword">return</span> comp(comp(comp(comp(rn1, rn2), rn3), rn4), rn5)
+	<span class="keyword">end</span>
+
+	<span class="comment">--- Composition of many rotnums.
+</span>	<span class="comment">--
+</span>	<span class="comment">-- Example:
+</span>	<span class="comment">--    rotnum.compn{rn1, rn2, ...}
+</span>	<span class="comment">--
+</span>	<span class="comment">-- @tparam table rns List of rotnums (can be empty).
+</span>	<a id="251"></a><span class="comment">-- @treturn rotnum The compositon of all rotnums.
+</span>	<span class="keyword">function</span> rotnum.compn(rns)
+		<span class="keyword">local</span> rn = rotnum.id()
+		<span class="keyword">for</span> i = <span class="number">1</span>, #rns <span class="keyword">do</span>
+			rn = comp(rn, rns[i])
+		<span class="keyword">end</span>
+		<span class="keyword">return</span> rn
+	<span class="keyword">end</span>
+
+	<span class="comment">--- Composition of <code>j</code> rotnums and application on a vector.
+</span>	<span class="comment">--
+</span>	<span class="comment">-- Read this as a template. The <code>compjapply()</code> function doesn't exist itself.
+</span>	<span class="comment">-- <code>j</code> can be any of <code>2, 3, 4, 5</code>.
+</span>	<span class="comment">--
+</span>	<span class="comment">-- These functions can be used as shortcut for multiple calls of <code>comp</code>,
+</span>	<span class="comment">-- followed by a call to <code>apply</code>, ie.:
+</span>	<span class="comment">--    -- both do the same:
+</span>	<span class="comment">--    rotnum.apply(rotnum.comp(rn1, rn2), vec)
+</span>	<span class="comment">--    rotnum.comp2apply(rn1, rn2, vec)
+</span>	<span class="comment">--
+</span>	<span class="comment">-- @tparam rotnum rn1
+</span>	<span class="comment">-- @tparam rotnum ... More rotnums. Number depends on <code>j</code>.
+</span>	<span class="comment">-- @tparam vector vec The vector to transform.
+</span>	<span class="comment">-- @treturn vector The transformed vector.
+</span>	<span class="comment">-- @function rotnum.compjapply
+</span><a id="276"></a>
+	<span class="keyword">function</span> rotnum.comp2apply(rn1, rn2, vec)
+		<span class="keyword">return</span> apply(comp(rn1, rn2), vec)
+	<span class="keyword">end</span>
+
+	<span class="keyword">function</span> rotnum.comp3apply(rn1, rn2, rn3, vec)
+		<span class="keyword">return</span> apply(comp(comp(rn1, rn2), rn3), vec)
+	<span class="keyword">end</span>
+
+	<span class="keyword">function</span> rotnum.comp4apply(rn1, rn2, rn3, rn4, vec)
+		<span class="keyword">return</span> apply(comp(comp(comp(rn1, rn2), rn3), rn4), vec)
+	<span class="keyword">end</span>
+
+	<span class="keyword">function</span> rotnum.comp5apply(rn1, rn2, rn3, rn4, rn5, vec)
+		<span class="keyword">return</span> apply(comp(comp(comp(comp(rn1, rn2), rn3), rn4), rn5), vec)
+	<span class="keyword">end</span>
+
+	<span class="keyword">local</span> compn = rotnum.compn
+
+	<span class="comment">--- Composition of many rotnums and application on a vector.
+</span>	<span class="comment">--
+</span>	<span class="comment">-- Example:
+</span>	<span class="comment">--    rotnum.compnapply({rn1, rn2, ...}, vector.new(1, 0, 0))
+</span>	<span class="comment">--
+</span>	<span class="comment">-- @tparam table rns List of rotnums (can be empty).
+</span>	<span class="comment">-- @tparam vector vec The vector to transform.
+</span>	<a id="302"></a><span class="comment">-- @treturn vector The transformed vector.
+</span>	<span class="keyword">function</span> rotnum.compnapply(rns, vec)
+		<span class="keyword">return</span> apply(compn(rns), vec)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Identity.
+</span><span class="comment">--
+</span><span class="comment">-- A vector stays unmodified if you apply the returned rotnum to it.
+</span><span class="comment">--
+</span><a id="312"></a><span class="comment">-- @treturn rotnum A constant.
+</span><span class="keyword">function</span> rotnum.id()
+	<span class="keyword">return</span> <span class="number">0x210</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Rotates <code>j*90</code> degrees around the +w axis.
+</span><span class="comment">--
+</span><span class="comment">-- Read this as a template. The <code>rjw()</code> function doesn't exist itself.
+</span><span class="comment">-- <code>j</code> can be any of <code>1, 2, 3</code>. <code>w</code> can be any of <code>x, y, z</code>.
+</span><span class="comment">-- Example: <code>rotnum.r1x()</code>
+</span><span class="comment">--
+</span><span class="comment">-- This is a left-handed rotation in left-handed coord system (equals right-handed
+</span><span class="comment">-- rotation in right-handed system).
+</span><span class="comment">-- Hence, it's a **left-handed rotation** in Minetest's left-handed system.
+</span><span class="comment">-- (Left-handed rotation is clockwise if you look from the <code>+w</code> side.)
+</span><span class="comment">--
+</span><span class="comment">-- @treturn rotnum A constant.
+</span><span class="comment">-- @function rotnum.rjw
+</span><a id="330"></a>
+<span class="keyword">function</span> rotnum.r1x()
+	<span class="comment">-- z=y, y=-z, x=x
+</span>	<span class="keyword">return</span> <span class="number">0x160</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r2x()
+	<span class="comment">-- z=-z, y=-y, x=x
+</span>	<span class="keyword">return</span> <span class="number">0x650</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r3x()
+	<span class="comment">-- z=-y, y=z, x=x
+</span>	<span class="keyword">return</span> <span class="number">0x520</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r1y()
+	<span class="comment">-- z=-x, y=y, x=z
+</span>	<span class="keyword">return</span> <span class="number">0x412</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r2y()
+	<span class="comment">-- z=-z, y=y, x=-x
+</span>	<span class="keyword">return</span> <span class="number">0x614</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r3y()
+	<span class="comment">-- z=x, y=y, x=-z
+</span>	<span class="keyword">return</span> <span class="number">0x016</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r1z()
+	<span class="comment">-- z=z, y=x, x=-y
+</span>	<span class="keyword">return</span> <span class="number">0x205</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r2z()
+	<span class="comment">-- z=z, y=-y, x=-x
+</span>	<span class="keyword">return</span> <span class="number">0x254</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.r3z()
+	<span class="comment">-- z=z, y=-x, x=y
+</span>	<span class="keyword">return</span> <span class="number">0x241</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Alias for <code>rotnum.rjw()</code>.
+</span><span class="comment">--
+</span><span class="comment">-- The <code>l</code> stands for left-handed rotation in a left-handed coordinate system.
+</span><span class="comment">--
+</span><span class="comment">-- Example: <code>rotnum.rl1x == rotnum.r1x</code>
+</span><span class="comment">--
+</span><span class="comment">-- @function rotnum.rljw
+</span><a id="383"></a>
+<span class="comment">--- Alias for <code>rotnum.r(4-j)w()</code>.
+</span><span class="comment">--
+</span><span class="comment">-- The second <code>r</code> stands for right-handed rotation in a left-handed coordinate system.
+</span><span class="comment">--
+</span><span class="comment">-- Example: <code>rotnum.rr1x == rotnum.r3x</code>
+</span><span class="comment">--
+</span><span class="comment">-- @function rotnum.rrjw
+</span><a id="391"></a>
+rotnum.rl1x = rotnum.r1x
+rotnum.rl2x = rotnum.r2x
+rotnum.rl3x = rotnum.r3x
+rotnum.rr1x = rotnum.r3x
+rotnum.rr2x = rotnum.r2x
+rotnum.rr3x = rotnum.r1x
+
+rotnum.rl1y = rotnum.r1y
+rotnum.rl2y = rotnum.r2y
+rotnum.rl3y = rotnum.r3y
+rotnum.rr1y = rotnum.r3y
+rotnum.rr2y = rotnum.r2y
+rotnum.rr3y = rotnum.r1y
+
+rotnum.rl1z = rotnum.r1z
+rotnum.rl2z = rotnum.r2z
+rotnum.rl3z = rotnum.r3z
+rotnum.rr1z = rotnum.r3z
+rotnum.rr2z = rotnum.r2z
+rotnum.rr3z = rotnum.r1z
+
+<span class="comment">--- Rotates a multiple of <code>90</code> degrees around the +w axis.
+</span><span class="comment">--
+</span><span class="comment">-- Read this as a template. The <code>rnw()</code> function doesn't exist itself.
+</span><span class="comment">-- <code>w</code> can be any of <code>x, y, z</code>.
+</span><span class="comment">-- Example: <code>rotnum.rnx()</code>
+</span><span class="comment">--
+</span><span class="comment">-- <code>n</code> will be taken modulo <code>4</code> and rounded to the nearest integer.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam number n How often to rotate.
+</span><span class="comment">-- @treturn rotnum One of <code>rotnum.rjw()</code>'s return values, depending on <code>n</code>.
+</span><span class="comment">-- @function rotnum.rnw
+</span><a id="424"></a>
+<span class="keyword">local</span> rx_by_n = {rotnum.id(), rotnum.r1x(), rotnum.r2x(), rotnum.r3x(), rotnum.id()}
+<span class="keyword">local</span> ry_by_n = {rotnum.id(), rotnum.r1y(), rotnum.r2y(), rotnum.r3y(), rotnum.id()}
+<span class="keyword">local</span> rz_by_n = {rotnum.id(), rotnum.r1z(), rotnum.r2z(), rotnum.r3z(), rotnum.id()}
+
+<span class="keyword">function</span> rotnum.rnx(n)
+	<span class="keyword">return</span> rx_by_n[math_floor(n % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.rny(n)
+	<span class="keyword">return</span> ry_by_n[math_floor(n % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.rnz(n)
+	<span class="keyword">return</span> rz_by_n[math_floor(n % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="comment">--- Alias for <code>rotnum.rnw(n)</code>.
+</span><span class="comment">--
+</span><span class="comment">-- Example: <code>rotnum.rlnx == rotnum.rnx</code>
+</span><span class="comment">--
+</span><span class="comment">-- @tparam number n
+</span><span class="comment">-- @treturn rotnum
+</span><span class="comment">-- @function rotnum.rlnw
+</span><a id="448"></a>
+rotnum.rlnx = rotnum.rnx
+rotnum.rlny = rotnum.rny
+rotnum.rlnz = rotnum.rnz
+
+<span class="comment">--- Alias for <code>rotnum.rnw(-n)</code>.
+</span><span class="comment">--
+</span><span class="comment">-- Example: <code>rotnum.rrnx</code>
+</span><span class="comment">--
+</span><span class="comment">-- @tparam number n
+</span><span class="comment">-- @treturn rotnum
+</span><span class="comment">-- @function rotnum.rrnw
+</span><a id="460"></a>
+<span class="keyword">function</span> rotnum.rrnx(n)
+	<span class="keyword">return</span> rx_by_n[math_floor((-n) % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.rrny(n)
+	<span class="keyword">return</span> ry_by_n[math_floor((-n) % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.rrnz(n)
+	<span class="keyword">return</span> rz_by_n[math_floor((-n) % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> rw_by_n_by_dir = {x = rx_by_n, y = ry_by_n, z = rz_by_n}
+
+<span class="comment">--- Rotate a multiple of <code>90</code> degrees around the given axis.
+</span><span class="comment">--
+</span><span class="comment">-- The semantics for <code>n</code> are the same as in <code>rotnum.rnw</code>.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam number n How often to rotate.
+</span><span class="comment">-- @tparam string dir <code>&quot;x&quot;</code>, <code>&quot;y&quot;</code> or <code>&quot;z&quot;</code>.
+</span><a id="481"></a><span class="comment">-- @treturn rotnum An output of <code>rotnums.rjw</code>, depending on <code>n</code> and <code>dir</code>.
+</span><span class="keyword">function</span> rotnum.rn_around(n, dir)
+	<span class="keyword">return</span> rw_by_n_by_dir[dir][math_floor(n % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="comment">--- Alias for <code>rotnum.rn_around(n, dir)</code>.
+</span><span class="comment">-- @tparam number n
+</span><span class="comment">-- @tparam string dir
+</span><span class="comment">-- @treturn rotnum
+</span><a id="490"></a><span class="comment">-- @function rotnum.rln_around
+</span>rotnum.rln_around = rotnum.rn_around
+
+<span class="comment">--- Alias for <code>rotnum.rn_around(-n, dir)</code>.
+</span><span class="comment">-- @tparam number n
+</span><span class="comment">-- @tparam string dir
+</span><a id="496"></a><span class="comment">-- @treturn rotnum
+</span><span class="keyword">function</span> rotnum.rrn_around(n, dir)
+	<span class="keyword">return</span> rw_by_n_by_dir[dir][math_floor((-n) % <span class="number">4</span> + <span class="number">1.5</span>)]
+<span class="keyword">end</span>
+
+<span class="comment">--- Mirrors along the w axis.
+</span><span class="comment">--
+</span><span class="comment">-- Read this as a template. The <code>mirror_w()</code> function doesn't exist itself.
+</span><span class="comment">-- <code>w</code> can be any of <code>x, y, z</code>.
+</span><span class="comment">-- Example: <code>rotnum.mirror_x()</code>
+</span><span class="comment">--
+</span><span class="comment">-- @treturn rotnum A constant.
+</span><span class="comment">-- @function rotnum.mirror_w
+</span><a id="509"></a>
+<span class="keyword">function</span> rotnum.mirror_x()
+	<span class="keyword">return</span> <span class="number">0x214</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.mirror_y()
+	<span class="keyword">return</span> <span class="number">0x250</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> rotnum.mirror_z()
+	<span class="keyword">return</span> <span class="number">0x610</span>
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> mirror_rotnums_per_dir = {x = rotnum.mirror_x(), y = rotnum.mirror_y(), z = rotnum.mirror_z()}
+
+<span class="comment">--- Mirror along given axis.
+</span><span class="comment">-- @tparam string dir <code>&quot;x&quot;</code>, <code>&quot;y&quot;</code> or <code>&quot;z&quot;</code>.
+</span><a id="526"></a><span class="comment">-- @treturn rotnum One of <code>rotnum.mirror_w()</code>'s return values, depending on <code>dir</code>.
+</span><span class="keyword">function</span> rotnum.mirror_along(dir)
+	<span class="keyword">return</span> mirror_rotnums_per_dir[dir]
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> lut_facedir_to_rotnum = {}
+<span class="keyword">local</span> lut_rotnum_to_facedir = {}
+
+<span class="keyword">do</span>
+	<span class="keyword">for</span> facedir = <span class="number">0</span>, <span class="number">0x19</span> <span class="keyword">do</span> <span class="comment">-- facedir only goes until 23, but including more does not hurt
+</span>		<span class="comment">-- see rotateMeshBy6dFacedir() in src/client/mesh.cpp
+</span>		<span class="keyword">local</span> axisdir = brshift(facedir, <span class="number">2</span>)
+		<span class="keyword">local</span> axisrot = band(facedir, <span class="number">0x3</span>)
+		<span class="keyword">local</span> rn = rotnum.comp(({
+				[<span class="number">0</span>] = rotnum.id(), <span class="comment">-- y+
+</span>				[<span class="number">1</span>] = rotnum.r1x(), <span class="comment">-- z+
+</span>				[<span class="number">2</span>] = rotnum.r3x(), <span class="comment">-- z-
+</span>				[<span class="number">3</span>] = rotnum.r3z(), <span class="comment">-- x+
+</span>				[<span class="number">4</span>] = rotnum.r1z(), <span class="comment">-- x-
+</span>				[<span class="number">5</span>] = rotnum.r2z(), <span class="comment">-- y-
+</span>				[<span class="number">6</span>] = rotnum.id(),
+				[<span class="number">7</span>] = rotnum.id(),
+			})[axisdir], ({
+				[<span class="number">0</span>] = rotnum.id(),
+				[<span class="number">1</span>] = rotnum.r1y(),
+				[<span class="number">2</span>] = rotnum.r2y(),
+				[<span class="number">3</span>] = rotnum.r3y(),
+			})[axisrot])
+		lut_facedir_to_rotnum[facedir] = rn
+		<span class="comment">-- do not overwrite (invalid facedir values result in duplicates)
+</span>		lut_rotnum_to_facedir[rn] = lut_rotnum_to_facedir[rn] <span class="keyword">or</span> facedir
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Converts a facedir number to a rotnum.
+</span><span class="comment">-- @tparam int facedir The facedir number.
+</span><a id="562"></a><span class="comment">-- @treturn rotnum The rotnum.
+</span><span class="keyword">function</span> rotnum.from_facedir(facedir)
+	<span class="keyword">return</span> lut_facedir_to_rotnum[facedir]
+<span class="keyword">end</span>
+
+<span class="comment">--- Tries to convert a rotnum to a facedir number.
+</span><span class="comment">--
+</span><span class="comment">-- Facedir values can represent any compositions of 90° rotations, but not
+</span><span class="comment">-- mirrorings for example. Hence, this can fail.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam rotnum rn The rotnum.
+</span><a id="573"></a><span class="comment">-- @return Facedir number or <code>false</code> on failure.
+</span><span class="keyword">function</span> rotnum.to_facedir(rn)
+	<span class="keyword">return</span> lut_rotnum_to_facedir[rn] <span class="keyword">or</span> <span class="keyword">false</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- copied from src/util/directiontables.cpp
+</span><span class="keyword">local</span> lut_wallmounted_to_facedir = {
+	[<span class="number">0</span>] = <span class="number">20</span>,
+	<span class="number">0</span>,
+	<span class="number">16</span> + <span class="number">1</span>,
+	<span class="number">12</span> + <span class="number">3</span>,
+	<span class="number">8</span>,
+	<span class="number">4</span> + <span class="number">2</span>
+}
+
+<span class="keyword">local</span> lut_facedir_to_wallmounted = {}
+<span class="keyword">do</span>
+	<span class="comment">-- fill with <code>false</code>
+</span>	<span class="keyword">for</span> facedir = <span class="number">0</span>, <span class="number">0x19</span> <span class="keyword">do</span>
+		lut_facedir_to_wallmounted[facedir] = <span class="keyword">false</span>
+	<span class="keyword">end</span>
+	<span class="keyword">for</span> wallmounted = <span class="number">0</span>, <span class="number">5</span> <span class="keyword">do</span>
+		<span class="keyword">local</span> facedir = lut_wallmounted_to_facedir[wallmounted]
+		lut_facedir_to_wallmounted[facedir] = lut_facedir_to_wallmounted[facedir]
+				<span class="keyword">or</span> wallmounted
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Converts a wallmounted number to a facedir number.
+</span><span class="comment">-- @tparam int wallmounted The wallmounted value.
+</span><a id="603"></a><span class="comment">-- @treturn int The facedir value.
+</span><span class="keyword">function</span> rotnum.wallmounted_to_facedir(wallmounted)
+	<span class="keyword">return</span> lut_wallmounted_to_facedir[wallmounted]
+<span class="keyword">end</span>
+
+<span class="comment">--- Tries to convert a facedir number to a wallmounted number.
+</span><span class="comment">-- @tparam int facedir The facedir value.
+</span><a id="610"></a><span class="comment">-- @return The wallmounted value or <code>false</code> on failure.
+</span><span class="keyword">function</span> rotnum.facedir_to_wallmounted(facedir)
+	<span class="keyword">return</span> lut_facedir_to_wallmounted[facedir] <span class="keyword">or</span> <span class="keyword">false</span>
+<span class="keyword">end</span>
+
+<span class="comment">-- make a shortcut for rotnum.from_wallmounted()
+</span><span class="keyword">local</span> lut_wallmounted_to_rotnum = {}
+<span class="keyword">for</span> wallmounted = <span class="number">0</span>, <span class="number">6</span> <span class="keyword">do</span>
+	lut_wallmounted_to_rotnum[wallmounted] =
+			rotnum.from_facedir(lut_wallmounted_to_facedir[wallmounted])
+<span class="keyword">end</span>
+
+<span class="comment">--- Converts a wallmounted number to a rotnum.
+</span><span class="comment">-- @tparam int wallmounted The wallmounted number.
+</span><a id="624"></a><span class="comment">-- @treturn rotnum The rotnum.
+</span><span class="keyword">function</span> rotnum.from_wallmounted(wallmounted)
+	<span class="keyword">return</span> lut_wallmounted_to_rotnum[wallmounted]
+<span class="keyword">end</span>
+
+<span class="comment">--- Tries to convert a rotnum to a wallmounted number.
+</span><span class="comment">-- @tparam rotnum rn The rotnum.
+</span><a id="631"></a><span class="comment">-- @return Wallmounted number or <code>false</code> on failure.
+</span><span class="keyword">function</span> rotnum.to_wallmounted(rn)
+	<span class="keyword">local</span> facedir = lut_rotnum_to_facedir[rn]
+	<span class="keyword">return</span> facedir <span class="keyword">and</span> lut_facedir_to_wallmounted[facedir] <span class="keyword">or</span> <span class="keyword">false</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Apply a facedir number to a vector.
+</span><span class="comment">--
+</span><span class="comment">-- Shortcut for:
+</span><span class="comment">--    rotnum.apply(rotnum.from_facedir(facedir), vec)
+</span><span class="comment">--
+</span><span class="comment">-- @tparam int facedir The facedir number.
+</span><span class="comment">-- @tparam vector vec The vector to transform.
+</span><a id="644"></a><span class="comment">-- @treturn vector The transformed vector.
+</span><span class="keyword">function</span> rotnum.apply_facedir(facedir, vec)
+	<span class="keyword">return</span> rotnum.apply(rotnum.from_facedir(facedir), vec)
+<span class="keyword">end</span>
+
+<span class="comment">--- Apply a wallmounted number to a vector.
+</span><span class="comment">--
+</span><span class="comment">-- Shortcut for:
+</span><span class="comment">--    rotnum.apply(rotnum.from_wallmounted(wallmounted), vec)
+</span><span class="comment">--
+</span><span class="comment">-- @tparam int wallmounted The wallmounted number.
+</span><span class="comment">-- @tparam vector vec The vector to transform.
+</span><a id="656"></a><span class="comment">-- @treturn vector The transformed vector.
+</span><span class="keyword">function</span> rotnum.apply_wallmounted(wallmounted, vec)
+	<span class="keyword">return</span> rotnum.apply(rotnum.from_wallmounted(wallmounted), vec)
+<span class="keyword">end</span>
+
+<span class="comment">--- (Rounds and) converts an euler angle vector to a rotnum.
+</span><span class="comment">-- @tparam vector euler_vec The euler vectors.
+</span><a id="663"></a><span class="comment">-- @treturn rotnum
+</span><span class="keyword">function</span> rotnum.from_euler(euler_vec)
+	<span class="keyword">return</span> rotnum.comp3(
+			rotnum.rny(-euler_vec.y * two_pi_th),
+			rotnum.rnx(-euler_vec.x * two_pi_th),
+			rotnum.rnz(-euler_vec.z * two_pi_th)
+		)
+<span class="keyword">end</span>
+
+<span class="keyword">local</span> lut_rotnum_to_euler = {}
+
+<span class="keyword">do</span>
+	<span class="keyword">local</span> <span class="keyword">function</span> rotnum_to_euler_slow(rn)
+		<span class="comment">-- use inverse to find out in what directions backward(+z), up(+y) and left(+x)
+</span>		<span class="comment">-- would be after rotation
+</span>		<span class="comment">-- (the "backward", etc., are assuming that if one places a node with facedir,
+</span>		<span class="comment">-- then its front face will look to the player)
+</span>		<span class="keyword">local</span> rni = rotnum.inv(rn)
+
+		<span class="keyword">local</span> pitch, roll = <span class="number">0</span>, <span class="number">0</span>
+		<span class="keyword">local</span> bits_for_yaw = rni
+
+		<span class="keyword">if</span> band(rni, <span class="number">0x300</span>) == <span class="number">0x100</span> <span class="keyword">then</span> <span class="comment">-- looking up or down
+</span>			<span class="keyword">local</span> is_up = band(rni, <span class="number">0x400</span>) == <span class="number">0x400</span>
+			<span class="comment">--~ minetest.chat_send_all("looking "..(is_up and "up" or "down"))
+</span>			pitch = (is_up <span class="keyword">and</span> -<span class="number">1</span> <span class="keyword">or</span> <span class="number">1</span>) * (<span class="global">math</span>.pi * <span class="number">0.5</span>)
+			<span class="comment">-- if looking down, use down as backward in yaw calculations,
+</span>			<span class="comment">-- if looking up, use up
+</span>			bits_for_yaw = blshift(bxor(rni, is_up <span class="keyword">and</span> <span class="number">0x000</span> <span class="keyword">or</span> <span class="number">0x040</span>), <span class="number">4</span>)
+
+		<span class="keyword">elseif</span> band(rni, <span class="number">0x003</span>) == <span class="number">0x001</span> <span class="keyword">then</span> <span class="comment">-- roll is sideways
+</span>			<span class="keyword">local</span> left_is_up = band(rni, <span class="number">0x004</span>) == <span class="number">0x000</span>
+			<span class="comment">--~ minetest.chat_send_all("roll is sideways: "..(left_is_up and
+</span>					<span class="comment">--~ "left is up" or "right is up"))
+</span>			roll = (left_is_up <span class="keyword">and</span> -<span class="number">1</span> <span class="keyword">or</span> <span class="number">1</span>) * (<span class="global">math</span>.pi * <span class="number">0.5</span>)
+
+		<span class="keyword">elseif</span> band(rni, <span class="number">0x070</span>) == <span class="number">0x050</span> <span class="keyword">then</span> <span class="comment">-- roll makes upside down
+</span>			<span class="comment">--~ minetest.chat_send_all("roll makes upside down")
+</span>			roll = <span class="global">math</span>.pi
+		<span class="keyword">end</span>
+
+		<span class="comment">--~ minetest.chat_send_all(("bits_for_yaw: %#x"):format(bits_for_yaw))
+</span>		<span class="comment">-- backward tells us the yaw
+</span>		<span class="keyword">local</span> yaw = ({
+				[<span class="number">0x200</span>] = <span class="number">0</span>,
+				[<span class="number">0x400</span>] = <span class="global">math</span>.pi * <span class="number">0.5</span>,
+				[<span class="number">0x600</span>] = <span class="global">math</span>.pi,
+				[<span class="number">0x000</span>] = <span class="global">math</span>.pi * <span class="number">1.5</span>,
+			})[band(bits_for_yaw, <span class="number">0x700</span>)]
+
+		<span class="keyword">return</span> vector_new(pitch, yaw, roll)
+	<span class="keyword">end</span>
+
+	<span class="comment">-- fill lut_rotnum_to_euler by iterating over all valid facedirs (=&gt; all rotations)
+</span>	<span class="keyword">for</span> facedir = <span class="number">0</span>, <span class="number">23</span> <span class="keyword">do</span>
+		<span class="keyword">local</span> rn = rotnum.from_facedir(facedir)
+		lut_rotnum_to_euler[rn] = rotnum_to_euler_slow(rn)
+	<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">--- Tries to convert a rotnum to euler angles.
+</span><span class="comment">--
+</span><span class="comment">-- Note: Euler angles can just rotate, hence this call can fail.
+</span><span class="comment">--
+</span><span class="comment">-- @tparam rotnum rn The rotnum to convert.
+</span><a id="728"></a><span class="comment">-- @return The vector of euler angles or <code>false</code> on failure.
+</span><span class="keyword">function</span> rotnum.to_euler(rn)
+	<span class="keyword">local</span> v = lut_rotnum_to_euler[rn]
+	<span class="keyword">return</span> v <span class="keyword">and</span> vector.copy(v) <span class="keyword">or</span> <span class="keyword">false</span>
+<span class="keyword">end</span>
+
+<span class="keyword">return</span> rotnum</pre>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.6</a></i>
+<i style="float:right;">Last updated 2023-04-01 22:41:20 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
