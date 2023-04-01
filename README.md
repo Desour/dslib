@@ -84,6 +84,9 @@ To generate the documentation, first install ldoc, then do:
 `$ make doc`
 Then open `doc/ldoc/index.html` with a web browser.
 
+An automatically built online version can be found here:
+<https://desour.codeberg.page/dslib/modules/dslib.html>
+
 
 # The files in this repo
 
