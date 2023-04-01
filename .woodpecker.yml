@@ -26,7 +26,7 @@ pipeline:
   run_busted_jit:
     image: akorn/luarocks:luajit2.1-alpine
     commands:
-      - apk --no-cache add gcc
+      - apk --no-cache add build-base
       - luarocks install busted
       - busted .
   #~ run_busted_puc:
