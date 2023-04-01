@@ -38,7 +38,7 @@ pipeline:
     image: alpine
     secrets: [ cbtoken, cbmail ]
     commands:
-      - apk --no-cache add build-base luajit lua5.1-dev luarocks5.1
+      - apk --no-cache add build-base luajit lua5.1-dev luarocks5.1 git
       - luarocks-5.1 install ldoc
       # Avoid permission denied errors
       - chmod -R a+w .
