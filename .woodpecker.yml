@@ -15,56 +15,56 @@
 # limitations under the License.
 
 pipeline:
-  run_reuse:
-    group: justdoallatonce
-    image: fsfe/reuse
-    commands:
-      - reuse lint
-  run_luacheck:
-    group: justdoallatonce
-    image: registry.gitlab.com/pipeline-components/luacheck:latest
-    commands:
-      - luacheck .
-  run_busted:
-    group: justdoallatonce
-    image: alpine
-    commands:
-      - apk --no-cache add build-base curl luajit lua5.1-dev luarocks5.1 openssl-dev lua5.1-bitop
-      - luarocks-5.1 install busted
-      - curl -o vector.lua https://raw.githubusercontent.com/minetest/minetest/stable-5/builtin/common/vector.lua
-      - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua busted --lua=/usr/bin/luajit .
-      - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 busted --lua=/usr/bin/luajit .
-      - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 DSLIB_LOAD_BITOP=1 busted --exclude-pattern=".*_onlyjit_spec%.lua" .
-  create_doc:
-    # Note: This step is mostly copied from here:
-    # https://codeberg.org/Codeberg-CI/examples/src/branch/main/Jekyll/jekyll.yml
-    group: justdoallatonce
-    image: alpine
-    secrets: [ cbtoken, cbmail ]
-    commands:
-      - apk --no-cache add build-base luajit lua5.1-dev luarocks5.1 git
-      - luarocks-5.1 install ldoc
-      # Avoid permission denied errors
-      - chmod -R a+w .
-      # Set up git in a working way
-      - git config --global --add safe.directory /woodpecker/src/codeberg.org/Desour/dslib/_site
-      - git config --global user.email "$CBMAIL"
-      - git config --global user.name "CI Builder"
-      - git config --global init.defaultBranch pages
-      # clone and move the target repo
-      - git clone -b pages https://codeberg.org/Desour/dslib.git
-      - mv dslib _site
-      - chmod -R a+w _site
-      - cd _site
-      # Prepare for push
-      - git remote set-url origin https://$CBTOKEN@codeberg.org/Desour/dslib.git
-      - cd ..
-      # Run ldoc
-      - ldoc --dir=_site .
-      # Push to target
-      - cd _site
-      - git add --all
-      - git commit -m "Woodpecker CI ldoc Build at $( env TZ=Europe/Berlin date +"%Y-%m-%d %X %Z" )"
-      - git push
-    when:
-      branch: master
+    run_reuse:
+        group: justdoallatonce
+        image: fsfe/reuse
+        commands:
+            - reuse lint
+    run_luacheck:
+        group: justdoallatonce
+        image: registry.gitlab.com/pipeline-components/luacheck:latest
+        commands:
+            - luacheck .
+    run_busted:
+        group: justdoallatonce
+        image: alpine
+        commands:
+            - apk --no-cache add build-base curl luajit lua5.1-dev luarocks5.1 openssl-dev lua5.1-bitop
+            - luarocks-5.1 install busted
+            - curl -o vector.lua https://raw.githubusercontent.com/minetest/minetest/stable-5/builtin/common/vector.lua
+            - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua busted --lua=/usr/bin/luajit .
+            - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 busted --lua=/usr/bin/luajit .
+            - DSLIB_PATH_TO_MINETEST_VECTOR=vector.lua DSLIB_DONT_USE_IE=1 DSLIB_LOAD_BITOP=1 busted --exclude-pattern=".*_onlyjit_spec%.lua" .
+    create_doc:
+        # Note: This step is mostly copied from here:
+        # https://codeberg.org/Codeberg-CI/examples/src/branch/main/Jekyll/jekyll.yml
+        group: justdoallatonce
+        image: alpine
+        secrets: [ cbtoken, cbmail ]
+        commands:
+            - apk --no-cache add build-base luajit lua5.1-dev luarocks5.1 git
+            - luarocks-5.1 install ldoc
+            # Avoid permission denied errors
+            - chmod -R a+w .
+            # Set up git in a working way
+            - git config --global --add safe.directory /woodpecker/src/codeberg.org/Desour/dslib/_site
+            - git config --global user.email "$CBMAIL"
+            - git config --global user.name "CI Builder"
+            - git config --global init.defaultBranch pages
+            # clone and move the target repo
+            - git clone -b pages https://codeberg.org/Desour/dslib.git
+            - mv dslib _site
+            - chmod -R a+w _site
+            - cd _site
+            # Prepare for push
+            - git remote set-url origin https://$CBTOKEN@codeberg.org/Desour/dslib.git
+            - cd ..
+            # Run ldoc
+            - ldoc --dir=_site .
+            # Push to target
+            - cd _site
+            - git add --all
+            - git commit -m "Woodpecker CI ldoc Build at $( env TZ=Europe/Berlin date +"%Y-%m-%d %X %Z" )"
+            - git push
+        when:
+            branch: master
