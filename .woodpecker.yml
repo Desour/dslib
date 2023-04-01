@@ -18,4 +18,4 @@ pipeline:
   run_luacheck:
     image: registry.gitlab.com/pipeline-components/luacheck:latest
     commands:
-      - luacheck .
+      - make run_static_checks
