@@ -198,21 +198,92 @@ local function split_fmtstr(fmtstr)
 	return result
 end
 
+local formatter_spec_parsers = {
+	f = function(spec, i)
+		local j = spec:find(")", i, true)
+		if not j then
+			error("Missing ')' for f().")
+		end
+		return spec:sub(i, j-1), j+1
+	end,
+	lit = function(spec, i)
+		local text = ""
+		local k = i
+		while true do
+			local j, _, c = spec:find("[()]", k, true)
+			if not j then
+				error("Missing ')' for lit().")
+			end
+			if spec:sub(j+1, j+1) == c then
+				text = text..spec:sub(k, j)
+				k = j+2
+			elseif c == "(" then
+				error("Unescaped '(' in lit().")
+			else -- c == ")"
+				text = text..spec:sub(k, j-1)
+				k = j+1
+				break
+			end
+		end
+		return text, k
+	end,
+	dump = function(spec, i)
+		assert(spec:sub(i, i) == ")")
+		return true, i+1
+	end,
+	dump2 = function(spec, i)
+		assert(spec:sub(i, i) == ")")
+		return true, i+1
+	end,
+}
+
+local formatter_funcs = {
+	default = function(_pspec, arg)
+		if type(arg) == "table" then
+			local mt = getmetatable(arg)
+			local f = type(mt) == "table" and mt.dslib_fmt_format
+			if f then
+				return f(arg)
+			end
+		end
+		return tostring(arg)
+	end,
+	f = function(pspec, arg)
+		return string.format(pspec, arg)
+	end,
+	lit = function(pspec, _arg)
+		return pspec
+	end,
+	dump = function(_pspec, arg)
+		return dump(arg)
+	end,
+	dump2 = function(_pspec, arg)
+		return dump2(arg)
+	end,
+}
+
 -- parses the {:<fmt_spec>} thing
 -- result is passed to formatter
-function fmt.parse_fmt_spec(fmt_spec)
-	return fmt_spec
+local function parse_fmt_spec(fmt_spec)
+	if fmt_spec == "" then
+		return {"default", true}
+	end
+	local i = fmt_spec:find("(", 1, true)
+	if not i then
+		error(string.format("Invalid format spec: '%s'", fmt_spec))
+	end
+	local n = fmt_spec:sub(1, i-1)
+	local pf = assert(formatter_spec_parsers[n],
+			string.format("Unknown format spec func: '%s'", n))
+	return {n, pf(fmt_spec, i+1)}
 end
 
-function fmt.formatter(spec, arg) --TODO
-	local arg_typ = type(arg)
-	if arg_typ == "string" then
-		assert(spec == "")
-		return arg
-	else
-		assert(spec == "")
-		return tostring(arg)
+local function formatter(pspec, arg)
+	local ff = formatter_funcs[pspec[1]]
+	if not ff then
+		error(string.format("Missing formatter func for: '%s'", pspec[1]))
 	end
+	return ff(pspec[2], arg)
 end
 
 local function make_fmt(escaper, do_nt)
@@ -254,7 +325,7 @@ local function make_fmt(escaper, do_nt)
 			if parts[i] == "fmt" then
 				local f = parts[i+1]
 				local j = f:find(":")
-				local arg_name = j and f:sub(j-1) or f
+				local arg_name = j and f:sub(1, j-1) or f
 				local fmt_spec = j and f:sub(j+1, -1) or ""
 				local arg_key
 				if arg_name == "" then
@@ -263,7 +334,7 @@ local function make_fmt(escaper, do_nt)
 				else
 					arg_key = parse_arg_key(arg_name)
 				end
-				fmt_spec = fmt.parse_fmt_spec(fmt_spec)
+				fmt_spec = parse_fmt_spec(fmt_spec)
 				parts[i+1] = {arg_key, fmt_spec}
 			end
 		end
@@ -279,7 +350,7 @@ local function make_fmt(escaper, do_nt)
 			else -- instructions[i] == "fmt"
 				local f = instructions[i+1]
 				my_table_insert_all(result,
-						fmt.formatter(f[2], lookup_arg(tabl, f[1])))
+						formatter(f[2], lookup_arg(tabl, f[1])))
 			end
 		end
 		return table.concat(result)

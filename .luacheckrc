@@ -10,6 +10,8 @@ read_globals = {
 	"vector",
 	"dslib",
 	table = {fields = {"key_value_swap"}},
+	"dump",
+	"dump2",
 }
 
 globals = {}
