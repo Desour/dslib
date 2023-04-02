@@ -2,7 +2,9 @@
 --
 -- SPDX-License-Identifier: CC0-1.0
 
-ignore = {}
+ignore = {
+	"21[123]/_.*", -- unused variable starting with _
+}
 
 read_globals = {
 	"minetest",
